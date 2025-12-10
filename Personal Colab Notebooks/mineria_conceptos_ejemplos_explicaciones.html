@@ -1,0 +1,331 @@
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Librerias">Librerias<a class="anchor-link" href="#Librerias">¶</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># Importa las bibliotecas necesarias</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">f_oneway</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ttest_rel</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.anova</span> <span class="kn">import</span> <span class="n">AnovaRM</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="1.-Prueba-T-Student-para-datos-relacionados-y-no-relacionados.">1. Prueba T Student para datos relacionados y no relacionados.<a class="anchor-link" href="#1.-Prueba-T-Student-para-datos-relacionados-y-no-relacionados.">¶</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Que es?:</strong>
+La prueba t para muestras relacionadas, también conocida como t de Student para muestras pareadas, se utiliza para comparar las medias de dos conjuntos de datos relacionados. En el ejemplo, se compara un conjunto de datos antes de un tratamiento con otro conjunto después del tratamiento.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Para qué sirve?:</strong> Esta prueba es útil cuando estás interesado en determinar si hay una diferencia significativa entre las medias de dos conjuntos de datos relacionados. Puede ser aplicada en situaciones donde las mediciones se realizan en los mismos individuos o elementos en diferentes momentos.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Cuándo debe utilizarse?</strong>: Deberías utilizar la prueba t para muestras relacionadas cuando tengas dos conjuntos de datos emparejados y estés interesado en evaluar si hay evidencia estadística de que hay una diferencia significativa entre las medias de las dos poblaciones.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Hipótesis de una cola (unilateral):</strong>1. <strong>Hipótesis de una cola (unilateral):</strong></p>
+<ul>
+<li>(H_0): No hay diferencia entre las medias $ \mu_1 - \mu_2 = 0\ $.</li>
+<li>(H_1): Hay una diferencia significativa y direccional $\mu_1 - \mu_2 &gt; 0$ o   $\mu_1 - \mu_2 &lt; 0$</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Hipótesis de dos colas (bilateral):</strong></p>
+<ul>
+<li>(H_0): No hay diferencia entre las medias $\mu_1 - \mu_2 = 0$.</li>
+<li>(H_1): Hay una diferencia significativa $\mu_1 - \mu_2 \neq 0$.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Cuando:</strong></p>
+<ul>
+<li>Se están comparando dos conjuntos de datos relacionados, como mediciones antes y después de un tratamiento.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># Genera dos conjuntos de datos relacionados (antes y después de un tratamiento, por ejemplo)</span>
+<span class="n">antes_tratamiento</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">25</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">27</span><span class="p">])</span>
+<span class="n">despues_tratamiento</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">22</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">29</span><span class="p">])</span>
+
+<span class="c1"># Realiza la prueba t para muestras relacionadas</span>
+<span class="n">statistic</span><span class="p">,</span> <span class="n">p_valor</span> <span class="o">=</span> <span class="n">ttest_rel</span><span class="p">(</span><span class="n">antes_tratamiento</span><span class="p">,</span> <span class="n">despues_tratamiento</span><span class="p">)</span>
+
+<span class="c1"># Imprime los resultados</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estadístico de prueba t:"</span><span class="p">,</span> <span class="n">statistic</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Valor p:"</span><span class="p">,</span> <span class="n">p_valor</span><span class="p">)</span>
+
+<span class="c1"># Interpreta los resultados</span>
+<span class="k">if</span> <span class="n">p_valor</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Hay evidencia estadística para rechazar la hipótesis nula."</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"No hay suficiente evidencia para rechazar la hipótesis nula."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Estadístico de prueba t: -1.1239029738980326
+Valor p: 0.323940830991843
+No hay suficiente evidencia para rechazar la hipótesis nula.
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="2.-Prueba-F.-ANOVA-una-v%C3%ADa.">2. Prueba F. ANOVA una vía.<a class="anchor-link" href="#2.-Prueba-F.-ANOVA-una-v%C3%ADa.">¶</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Qué es?</strong>: El análisis de varianza (ANOVA) y la prueba F se utilizan para comparar las medias de más de dos grupos. En el ejemplo, se tienen tres grupos diferentes ('grupo1', 'grupo2', 'grupo3') y se realiza una prueba F para determinar si hay diferencias significativas entre las medias.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Para qué sirve?</strong>: El ANOVA es útil cuando se tienen varios grupos y se desea saber si al menos uno de ellos tiene una media significativamente diferente. La prueba F se utiliza para evaluar si las varianzas entre los grupos son significativamente diferentes.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Cuándo debe utilizarse?</strong>: Deberías utilizar ANOVA y la prueba F cuando tengas más de dos grupos y desees evaluar si hay diferencias significativas entre al menos dos de ellos. Si el resultado de ANOVA indica que hay diferencias significativas, se pueden realizar pruebas post hoc para identificar qué grupos difieren entre sí.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Hipótesis de una cola (unilateral):</strong></p>
+<ul>
+<li>(H_0): No hay diferencia entre las medias de los grupos $\mu_1 = \mu_2 = \mu_3$.</li>
+<li>(H_1): Al menos un grupo tiene una media mayor o menor $\mu_1 &gt; \mu_2 &gt; \mu_3$ o $\mu_1 &lt; \mu_2 &lt; \mu_3$.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Hipótesis de dos colas (bilateral):</strong></p>
+<ul>
+<li>(H_0): No hay diferencia entre las medias de los grupos $\mu_1 = \mu_2 = \mu_3.$</li>
+<li>(H_1): Al menos un grupo tiene una media diferente $\mu_1 \neq \mu_2 \neq \mu_3.$</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Cuando:</strong></p>
+<ul>
+<li>Se están comparando tres o más grupos independientes.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># Genera tres conjuntos de datos para el ejemplo (puedes adaptar esto según tus datos)</span>
+<span class="n">grupo1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">30</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">38</span><span class="p">])</span>
+<span class="n">grupo2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">25</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">29</span><span class="p">])</span>
+<span class="n">grupo3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">22</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">30</span><span class="p">])</span>
+
+<span class="c1"># Realiza la prueba de ANOVA</span>
+<span class="n">estadistico_anova</span><span class="p">,</span> <span class="n">p_valor_anova</span> <span class="o">=</span> <span class="n">f_oneway</span><span class="p">(</span><span class="n">grupo1</span><span class="p">,</span> <span class="n">grupo2</span><span class="p">,</span> <span class="n">grupo3</span><span class="p">)</span>
+
+<span class="c1"># Imprime los resultados</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Estadístico de prueba ANOVA:"</span><span class="p">,</span> <span class="n">estadistico_anova</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Valor p ANOVA:"</span><span class="p">,</span> <span class="n">p_valor_anova</span><span class="p">)</span>
+
+<span class="c1"># Interpreta los resultados</span>
+<span class="k">if</span> <span class="n">p_valor_anova</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Hay evidencia estadística para rechazar la hipótesis nula."</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"No hay suficiente evidencia para rechazar la hipótesis nula."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Estadístico de prueba ANOVA: 4.391420911528148
+Valor p ANOVA: 0.0370559441269642
+Hay evidencia estadística para rechazar la hipótesis nula.
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="3.-Prueba-F.-ANOVA-2-v%C3%ADas.">3. Prueba F. ANOVA 2 vías.<a class="anchor-link" href="#3.-Prueba-F.-ANOVA-2-v%C3%ADas.">¶</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Qué es?</strong>: El análisis de varianza de doble vía (ANOVA de doble vía) y la prueba F se utilizan para comparar las medias cuando hay dos factores o variables independientes. En el ejemplo, se tienen dos factores ('Tratamiento' y 'Género').</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Para qué sirve?</strong>: El ANOVA de doble vía es útil cuando deseas evaluar la influencia de dos factores simultáneamente en la variabilidad de los datos. Permite determinar si hay interacciones significativas entre los factores y cómo afectan a la variable de interés.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>¿Cuándo debe utilizarse?</strong>: Deberías utilizar el ANOVA de doble vía cuando tengas dos factores que crees que pueden influir en la variable de interés y desees examinar cómo interactúan entre sí. Esta prueba es apropiada cuando los datos se pueden clasificar en dos dimensiones, por ejemplo, tratamientos y género en el ejemplo proporcionado.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Hipótesis de una cola (unilateral) para cada factor:</strong></p>
+<ul>
+<li>(H_0): No hay efecto principal del factor o interacción.</li>
+<li>(H_1): Hay un efecto principal significativo o interacción $\mu_1 &gt; \mu_2$ o $\mu_1 &lt; \mu_2.$</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Hipótesis de dos colas (bilateral) para cada factor:</strong></p>
+<ul>
+<li>(H_0): No hay efecto principal del factor o interacción.</li>
+<li>(H_1): Hay un efecto principal significativo o interacción $\mu_1 \neq \mu_2.$</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Cuando:</strong></p>
+<ul>
+<li>Se están evaluando dos factores que podrían influir en la variable de interés, y se desea examinar cómo interactúan entre sí.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># Genera datos de ejemplo con dos factores: 'Tratamiento' y 'Género'</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Crear un DataFrame con datos de ejemplo</span>
+<span class="n">datos</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">'Tratamiento'</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">],</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="s1">'Género'</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">([</span><span class="s1">'Hombre'</span><span class="p">,</span> <span class="s1">'Mujer'</span><span class="p">],</span> <span class="mi">30</span><span class="p">),</span>
+    <span class="s1">'Resultado'</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1"># Agrega los datos para manejar múltiples observaciones por sujeto y celda</span>
+<span class="n">datos_agregados</span> <span class="o">=</span> <span class="n">datos</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">'Tratamiento'</span><span class="p">,</span> <span class="s1">'Género'</span><span class="p">])</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">'Resultado'</span><span class="p">:</span> <span class="s1">'mean'</span><span class="p">})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+<span class="c1"># Realiza un ANOVA de doble vía usando scipy.stats</span>
+<span class="n">modelo_anova_scipy</span> <span class="o">=</span> <span class="n">AnovaRM</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">datos_agregados</span><span class="p">,</span> <span class="n">depvar</span><span class="o">=</span><span class="s1">'Resultado'</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">'Género'</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="p">[</span><span class="s1">'Tratamiento'</span><span class="p">])</span>
+<span class="n">resultado_anova_scipy</span> <span class="o">=</span> <span class="n">modelo_anova_scipy</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># Imprime los resultados usando scipy.stats</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"ANOVA de doble vía usando scipy.stats:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">resultado_anova_scipy</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>ANOVA de doble vía usando scipy.stats:
+                 Anova
+========================================
+            F Value Num DF Den DF Pr &gt; F
+----------------------------------------
+Tratamiento  2.3387 2.0000 2.0000 0.2995
+========================================
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
