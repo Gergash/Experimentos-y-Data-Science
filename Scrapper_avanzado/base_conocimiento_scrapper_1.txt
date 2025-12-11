@@ -1,0 +1,1976 @@
+The basics of Python web scraping
+Summarize with:
+ChatGPT
+Claude.ai
+Google AI
+Grok
+Perplexity
+Share:
+Web scraping is a valuable skill. It allows you to collect and analyze large amounts of data from web pages with almost no manual effort through automatic extraction. Python is a top choice for this task due to its beginner-friendly syntax and ready-to-use modules, which make it easy to write web scraping scripts.
+
+In this article, we will share a step-by-step guide on Python web scraping using an Ubuntu VPS.
+
+Prerequisites
+How to web scrape with Python
+Setting up your environment for Python web scraping
+Making your first request
+Extracting data with Beautiful Soup
+Parsing HTML and navigating the DOM tree
+Storing scraped data
+Using regular expressions to scrape data
+Handling dynamic content and Ajax calls
+Handling dynamic data using Selenium
+Handling dynamic data by analyzing network requests
+Error handling and logging
+Creating a simple web scraper application
+Python web scraping FAQ
+Which Python libraries are commonly used for web scraping?
+Is it possible to scrape websites that require login credentials using Python?
+Can I extract images or media files with Python web scraping?
+Web scraping vs. API which is better?
+Prerequisites
+To follow along with this Python web scraping tutorial, you will need:
+
+An Ubuntu VPS with Python pip and venv module installed.
+Secure Shell (SSH) access to the VPS.
+Basic knowledge of how to run commands on a terminal.
+While you can technically write Python code for web scraping without using a Virtual Private Server (VPS), We recommend using one, especially for beginners. With its dedicated resources, a VPS hosting plan will provide more stability and better performance for web scraping, especially for large-scale tasks. For example, if your script is taking too long to execute on your local machine or consuming too much memory, you can switch to a VPS to ramp up your scraping power.
+
+
+How to web scrape with Python
+Follow these steps to set up your first web scraping project.
+
+Setting up your environment for Python web scraping
+Start by logging in to your VPS via SSH. You can use a SSH client, like PuTTY for this purpose.
+
+Simply download and install PuTTY, launch it, enter the IP address of your VPS, and then log in using your credentials. If you are a Hostinger user, you can find your VPS login credentials by navigating to hPanel → VPS → Manage → SSH access.
+
+Once you are logged in, run these commands in order.
+The first will create a new virtual environment for Python.
+
+python3 -m venv myenv
+The below command activates the virtual environment. In other words, you are now inside your own virtual environment and ready to start.
+
+source myenv/bin/activate
+The last command installs Beautiful Soup, which is one of the most popular Python web scraping libraries. It will load the requests package for sending HTTP requests.
+
+pip install requests beautifulsoup4
+Making your first request
+Python’s requests library provides a user-friendly interface ideal for interacting with web servers through HTTP requests. To make our first request, let’s start with a simple Python script – a file containing Python code that can be executed to perform specific tasks.
+
+Our script will use the requests library to send an HTTP GET request and print the HTML response.
+
+You can use the touch command to do so:
+
+touch temp.py
+Open the file in your favorite editor, paste the following code into it, and then save it.
+
+import requests
+
+# Send a GET request to the URL
+
+response = requests.get('https://www.hostinger.com/tutorials/how-to-run-a-python-script-in-linux')
+
+# Print the HTML content of the page
+
+print(response.text)
+Now, run the script with this command:
+
+python3 temp.py
+After running the command, you should see a large amount of HTML content printed on your console.
+
+Extracting data with Beautiful Soup
+Now that we have a basic idea of how HTTP requests and responses work let’s see how we can extract some data from the retrieved response object. For this purpose, we will use Beautiful Soup. This Python library parses HTML content and HTML data into a tree-like structure, making it easy to navigate and extract specific information.
+
+Use the following command to create a new script named scraping.py.
+
+touch scraping.py
+Open the file in your favorite editor and paste the following code to it:
+
+import requests
+
+from bs4 import BeautifulSoup
+
+# Send a GET request to the URL
+
+response = requests.get('https://www.hostinger.com/tutorials/how-to-run-a-python-script-in-linux')
+
+# Parse the HTML content using BeautifulSoup
+
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Find all elements with a specific tag (e.g. all h2 headings)
+
+titles = soup.find_all('h2')
+
+# Extract text content from each H2 element
+
+for title in titles:
+
+print(title.text)
+In this code, we are sending an HTTP GET request to the same URL and parsing the HTML content using Beautiful Soup. Then, we will use the find_all function to retrieve all H2 headings from the parsed content. Finally, we need to print the text content for each H2 heading.
+
+Run this command to execute the script:
+
+python3 scraping.py
+On your console, you should see a list of all H2 headings from the visited URL, like in the image below.
+
+beautiful soup data extraction
+Parsing HTML and navigating the DOM tree
+We’ve now seen how Beautiful Soup extracts data by finding specific elements. However, websites often have complex structures, and you may need to navigate much deeper to reach the information you need. This is why it’s important to understand how the Document Object Model (DOM) works, and how you can traverse it and retrieve data using BeautifulSoup.
+
+The DOM represents an HTML document, the core of all web data, as a tree structure, where elements like <div>, <h1>, and <p> are nodes with parent-child relationships. We can use Beautiful Soup functions to traverse this tree and locate specific website data points.
+
+To explore the concept in more depth, we will update our scraping.py script to locate different structures inside the HTML. Replace the contents of the scraping.py file with this code.
+
+Before we run this code, however, let’s explore what different parts of it are doing. This will help you better understand the fundamentals of web scraping in Python.
+
+The below section of this code allows us to import the required libraries, send a GET request, and parse the HTML elements to respond to it:
+
+import requests
+
+from bs4 import BeautifulSoup
+
+# Send a GET request to the URL
+
+response = requests.get('https://www.hostinger.com/tutorials/how-to-run-a-python-script-in-linux')
+
+# Parse the HTML content using BeautifulSoup
+
+soup = BeautifulSoup(response.text, 'html.parser')
+Next, this portion is used to retrieve the first <h1> tag in the HTML document, and then print the text inside it:
+
+# Find the first <h1> tag
+
+first_header = soup.find('h1')
+
+print('First <h1> tag text:', first_header.text)
+Now, we find all the <a> tags, i.e. links, in the HTML documents and store them in the all_links list. Then, we run a for loop to iterate through each link and print the href attribute of each <a> tag.
+
+# Find all <a> tags (links)
+
+all_links = soup.find_all('a')
+
+print('All <a> tag hrefs:')
+
+for link in all_links:
+
+print(link.get('href'))
+We are ready to extract the <a> HTML tags from the list of links, and then print the text and href attribute together. This demonstrates how you can dig deep into a particular attribute, HTML string, or HTML element if you desire, perfectly demonstrating how web scraping can be of use for analyzing data.
+
+# Access attributes of an element
+
+first_link = all_links[0]
+
+print('First link text:', first_link.text)
+
+print('First link href:', first_link.get('href'))
+Lastly, the if statement checks if we were able to find the first header in part 2. Then, we get the parent HTML element of the first <h1> tag and print its name. Finally, we find the next sibling of the first <h1> tag and print its name. If there is no next sibling, “no next sibling” will be printed. This demonstrates how you can navigate through different levels of the DOM tree, such as moving to parent elements and sibling elements.
+
+# Navigate using parent and siblings
+
+if first_header:
+
+parent_element = first_header.parent
+
+print('Parent of first <h1> tag:', parent_element.name)
+C div exists as an HTML element. If it does, it finds the first <span> child element inside this <div> and prints its text. If the div is not found, it logs a message on the screen to indicate that. This demonstrates how you can navigate the DOM tree to locate specific elements and extract their content.
+
+# Navigate the DOM tree
+
+# Example: Find a div with a specific class, then find a child element
+
+specific_div = soup.find('div', class_='d-flex')
+
+if specific_div:
+
+child_element = specific_div.find('span')
+
+if child_element:
+
+ print('Text of child <span> in specific div:', child_element.text)
+
+else:
+
+print('Div with class "d-flex" n
+
+next_sibling = first_header.find_next_sibling()
+
+print('Next sibling of first <h1> tag:', next_sibling.name if next_sibling else 'No next sibling')
+Now, you execute the .py file script via this command:
+
+python3 scraping.py
+Expect an output like this:
+
+navigating the DOM tree
+The output above shows:
+
+The H1 tag.
+All the <a> tags.
+The text and link of the first <a> tag.
+Text of the child element of a div with a specific class.
+The parent and sibling of the first H1 tag.
+For your reference, this is the complete code to paste over, with all functions included:
+
+import requests
+
+from bs4 import BeautifulSoup
+
+# Send a GET request to the URL
+
+response = requests.get('https://www.hostinger.com/tutorials/how-to-run-a-python-script-in-linux')
+
+# Parse the HTML content using BeautifulSoup
+
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Find the first <h1> tag
+
+first_header = soup.find('h1')
+
+print('First <h1> tag text:', first_header.text)
+
+# Find all <a> tags (links)
+
+all_links = soup.find_all('a')
+
+print('All <a> tag hrefs:')
+
+for link in all_links:
+
+print(link.get('href'))
+
+# Access attributes of an element
+
+first_link = all_links[0]
+
+print('First link text:', first_link.text)
+
+print('First link href:', first_link.get('href'))
+
+# Navigate the DOM tree
+
+# Example: Find a div with a specific class, then find a child element
+
+specific_div = soup.find('div', class_='d-flex')
+
+if specific_div:
+
+child_element = specific_div.find('span')
+
+if child_element:
+
+ print('Text of child <span> in specific div:', child_element.text)
+
+else:
+
+print('Div with class "d-flex" not found')
+
+# Navigate using parent and siblings
+
+if first_header:
+
+parent_element = first_header.parent
+
+print('Parent of first <h1> tag:', parent_element.name)
+
+next_sibling = first_header.find_next_sibling()
+
+print('Next sibling of first <h1> tag:', next_sibling.name if next_sibling else 'No next sibling')
+Storing scraped data
+After scraping all the data you need, you’ll often need to store it for later use. Two common ways to store scraped data are by saving it to a CSV file or a database, like MongoDB. We’ll update our script to use both.
+
+First, install the pymongo library by running the following command. This library will be used to write the web scraping data you have collected to a MongoDB instance.
+
+pip install pymongo
+Next, add the following code to the top of your scraping.py file. This code imports the libraries we will use to write to a CSV file and a MongoDB instance.
+
+import csv
+
+from pymongo import MongoClient
+
+import sys
+Now, add the following to the end of your scraping.py file.
+In the below Python code, we are creating an object data_to_store that contains all the data we want to store in a CSV file and a MongoDB database.
+
+Then, we use the CSV library to write the data over to a new CSV file. Finally, we use the MongoClient object to connect to a local MongoDB database and write the data to the scraped_data collection.
+
+# Extracting data for storing
+
+data_to_store = {
+
+'First_h1_tag': first_header.text,
+
+'First_link_text': first_link.text,
+
+'First_link_href': first_link.get('href')
+
+}
+
+# Storing data to a CSV file
+
+csv_file = 'scraped_data.csv'
+
+with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+
+writer = csv.DictWriter(file, fieldnames=data_to_store.keys())
+
+writer.writeheader()
+
+writer.writerow(data_to_store)
+
+print('Data saved to CSV file:', csv_file)
+
+# Storing data to MongoDB
+
+try:
+
+client = MongoClient('mongodb://localhost:27017/')
+
+db = client['scraping_db']
+
+collection = db['scraped_data']
+
+collection.insert_one(data_to_store)
+
+print('Data saved to MongoDB collection: scraped_data')
+
+except Exception as e:
+
+print('Error:', e)
+
+print('Failed to connect to MongoDB. Exiting...')
+
+sys.exit(1)
+Note that you can connect to a remote MongoDB instance too by replacing the URL above. You may also specify different names for the MongoDB database and collection.
+
+If you don’t have a running MongoDB instance, the code will still work because we have added a try-except block to handle errors.
+
+Lastly, execute the script by running this command:
+
+python3 scraping.py
+Upon successful execution, you should see the following lines at the bottom:
+
+Data saved to CSV file: scraped_data.csv
+
+Data saved to MongoDB collection: scraped_data
+If you don’t have a MongoDB database running, you should see an error on the terminal indicating that the data couldn’t be saved to the MongoDB database. However, the CSV file should still be generated. To display its contents, run the following command:
+
+cat scraped_data.csv
+The output should look like this:
+
+The CSV file contents
+Using regular expressions to scrape data
+Regular expressions (regex) are a powerful tool for pattern matching and can be very useful in web scraping when you need to extract data that follows a specific pattern. Let’s walk through an example to illustrate how you can combine Beautiful Soup and regular expressions to scrape data.
+
+Create a new file named regex.py and paste the following code to it:
+
+import requests
+
+from bs4 import BeautifulSoup
+
+import re
+
+# Send a GET request to the URL
+
+response = requests.get('https://webscraper.io/test-sites/e-commerce/static/phones')
+
+# Parse the HTML content using BeautifulSoup
+
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Define a regex pattern for matching email addresses
+
+email_pattern = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+
+# Find all text in the HTML that matches the email pattern
+
+emails = soup.find_all(string=email_pattern)
+
+# Print all matched email addresses
+
+for email in emails:
+
+print(email)
+
+# Define a regex pattern for matching URLs containing 'commerce'
+
+url_pattern = re.compile(r'.*commerce.*')
+
+# Find all <a> tags with href attributes matching the URL pattern
+
+links = soup.find_all('a', href=url_pattern)
+
+# Print all matched URLs
+
+for link in links:
+
+print(link['href'])
+In the above code, we are defining a regular expression (r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}‘) for email addresses, and then using that regular expression to find all email addresses in the page.
+
+Then, we define another regular expression (r’.*commerce.*’) that finds all <a> tags in the HTML containing the word commerce.
+
+Execute the script by running this command:
+
+python3 regex.py
+The output should show an email address, followed by all the links that contain commerce. Like this:
+
+regex based scraping
+Handling dynamic content and Ajax calls
+When web scraping, you may notice dynamic content that’s loaded via AJAX calls or JavaScript. This dynamic content may not be present in the initial HTML response, because it will only show after the page first loads. In this section, we’ll explore how to handle these scenarios.
+
+Handling dynamic data using Selenium
+Selenium is an open-source tool for automating web browsers. It can execute JavaScript code, wait for content to load dynamically, and then scrape and retrieve the data you need. The Python library for Selenium can be downloaded by running this command:
+
+pip install selenium
+Here’s a sample Selenium script that waits for a specific element to load before extracting desired data:
+
+from selenium import webdriver
+
+from selenium.webdriver.common.by import By
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.support import expected_conditions as EC
+
+
+
+# Define the URL to scrape
+
+url = 'https://www.example.com' # Replace with the target website
+
+
+
+# Create a new WebDriver instance
+
+driver = webdriver.Chrome('/path/to/chromedriver') # Replace with your WebDriver path
+
+
+
+# Navigate to the URL
+
+driver.get(url)
+
+
+
+# Explicit wait for content to load (adjust wait time as needed)
+
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'unique_element_id')))
+
+# Locate and extract the desired data using Selenium methods
+
+view_details_buttons = driver.find_elements(By.CLASS_NAME, 'view_details_button')
+
+# Close the browser window
+
+driver.quit()
+Handling dynamic data by analyzing network requests
+Another way to manage dynamic data is by inspecting network requests in your browser’s developer tools to identify the AJAX requests used. You can then mimic these requests in your scraping script using the requests library.
+
+Error handling and logging
+Error handling and logging techniques are crucial for writing effective scraping scripts. Websites are dynamic and will change their structure or behavior over time. Additionally, network issues, server-side errors, and unexpected data formats can all lead to unexpected behavior in your scraping script.
+
+When you implement proper error handling and logging, you will be able to gracefully handle errors or exceptions and prevent your script from crashing. Moreover, your code becomes more readable and easier to maintain. You can also quickly identify potential problem areas and adjust your script as needed.
+
+Here’s how you can go about implementing error handling and logging during web scraping:
+
+Import the logging module by adding the following line to the top of your script:
+import logging
+Set up logging by adding this line:
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+Wrap network requests within try-except blocks. This ensures that if an HTTP request fails, the proper error is logged and the script gracefully exits (instead of crashing).
+try:
+
+# Send a GET request to the URL
+
+response = requests.get('https://www.hostinger.com/tutorials/how-to-run-a-python-script-in-linux')
+
+response.raise_for_status() # Raise HTTPError for bad responses
+
+except requests.RequestException as e:
+
+logging.error(f"Request failed: {e}")
+
+sys.exit(1)
+
+# Parse the HTML content using BeautifulSoup
+
+soup = BeautifulSoup(response.text, 'html.parser')
+Handle potential errors and exceptions in parsing and data extraction. This will help you identify the tags/elements the script was unable to fetch.
+try:
+
+# Find the first <h1> tag
+
+first_header = soup.find('h1')
+
+if first_header:
+
+ print('First <h1> tag text:', first_header.text)
+
+else:
+
+logging.warning('No <h1> tag found')
+
+except Exception as e:
+
+logging.error(f"Error finding first <h1> tag: {e}")
+
+try:
+
+# Find all <a> tags (links)
+
+all_links = soup.find_all('a')
+
+if all_links:
+
+print('All <a> tag hrefs:')
+
+ for link in all_links:
+
+print(link.get('href'))
+
+else:
+
+logging.warning('No <a> tags found')
+
+except Exception as e:
+
+logging.error(f"Error finding <a> tags: {e}")
+If ever you are unable to find the root cause of an issue, you can enable interactive debugging via Python’s built-in debugger, pdb.
+import pdb; pdb.set_trace()
+
+# Your code here
+Creating a simple web scraper application
+Now that we have explored how to extract data, navigate a DOM, use regular expressions to retrieve filtered data, and implement error handling, let’s create a simple web scraper application in Python. Here’s how it will work:
+
+It will take a keyword and a URL as input.
+It will calculate the number of times the keyword exists in the page text.
+It will also display all the internal links present in the text.
+In our code, we will create functions for getting the HTML (get_html), counting keywords (count_keyword), finding all external links (find_external_links), and a main function that prompts the user for inputs and calls all the other functions. The code will also implement proper error handling, so if anything fails in your web scraping efforts, the user will be shown the exact error on their terminal.
+
+Use the following command to create a new file named app.py:
+
+touch app.py
+Then, open it in your favorite editor and paste the following code to it.
+
+import requests
+
+from bs4 import BeautifulSoup
+
+import re
+
+from urllib.parse import urlparse
+
+# Function to get HTML content from a URL
+
+def get_html(url):
+
+try:
+
+ response = requests.get(url)
+
+ response.raise_for_status()
+
+ return response.text
+
+except requests.exceptions.RequestException as e:
+
+ print('Error fetching the URL:', e)
+
+ return None
+
+# Function to count keyword occurrences
+
+def count_keyword(html, keyword):
+
+keyword = keyword.lower()
+
+text = BeautifulSoup(html, 'html.parser').get_text().lower()
+
+return text.count(keyword)
+
+# Function to find all external links
+
+def find_external_links(html, base_url):
+
+soup = BeautifulSoup(html, 'html.parser')
+
+links = soup.find_all('a', href=True)
+
+external_links = []
+
+parsed_base_url = urlparse(base_url)
+
+base_domain = parsed_base_url.netloc
+
+for link in links:
+
+ href = link.get('href')
+
+ parsed_href = urlparse(href)
+
+ # If the link is external (different domain)
+
+ if parsed_href.netloc and parsed_href.netloc != base_domain:
+
+ external_links.append(href)
+
+return external_links
+
+# Main function
+
+def main():
+
+keyword = input("Enter the keyword: ")
+
+url = input("Enter the URL: ")
+
+html = get_html(url)
+
+if html is None:
+
+ print('Failed to retrieve HTML content.')
+
+ return
+
+keyword_count = count_keyword(html, keyword)
+
+external_links = find_external_links(html, url)
+
+print(f"\nKeyword '{keyword}' found {keyword_count} times in the page.")
+
+print("\nExternal Links:")
+
+for link in external_links:
+
+ print(link)
+
+if __name__ == "__main__":
+
+main()
+Use the following command to run the script:
+
+python3 app.py
+When prompted, enter the keyword and the URL you want to use. Here’s the output we got after passing python and https://www.hostinger.com/tutorials/how-to-run-a-python-script-in-linux as the input parameters:
+
+simple web scraping app
+Conclusion
+Web scraping is a great way to process, analyze, and aggregate large volumes of online data. In this article, we learnt how to make your first request in Python, use BeautifulSoup to extract data, parse HTML and navigate the DOM tree, leverage regular expressions to scrape data, handle dynamic content, and store scraped data in a file and database. We hope you have found it useful.
+
+Python web scraping FAQ
+Which Python libraries are commonly used for web scraping?
+The Python libraries most commonly used for web scraping are Beautiful Soup, requests, and Scrapy.
+
+Is it possible to scrape websites that require login credentials using Python?
+It is technically possible to scrape websites that require login credentials using web scraping. However, you may need to replicate the login process, which can be complex. For example, you may need to handle CAPTCHAs, multi-factor authentication, or other security measures. Before you proceed, make sure that web scraping doesn’t violate the website’s terms of service.
+
+Can I extract images or media files with Python web scraping?
+Yes, you can extract multimedia files from websites using Python web scraping. Here’s a simplified overview of the process:
+
+1. Retrieve the HTML of the relevant page.
+2. Use BeautifulSoup to find the appropriate HTML tag, e.g. <img> for images.
+3. Extract the URL of the image/media file from the tag.
+4. Use the requests library to download the image/media file using its URL.
+
+Web scraping vs. API: which is better?
+Both web scraping and APIs have their merits, and the better choice depends on your specific needs. If an API is available, and offers the data you need in a structured format, it’s generally the preferred option due to its ease of use and standardization. However, if you need specific data, and the website doesn’t offer an API, web scraping may be your only option.
+
+All of the tutorial content on this website is subject to Hostinger's rigorous editorial standards and values.
+
+Author
+The author
+Valentinas C.
+
+Valentinas Čirba, Hostinger's Head of VPS, is a seasoned product leader specializing in VPS products with over ten years of experience. He's an expert at setting product strategy, leading cross-functional teams, and making smart decisions to deliver innovative solutions. Valentinas is committed to creating products that not only meet business objectives but also truly serve the customer. Follow him on LinkedIn.
+
+More from Valentinas C.
+
+¿Qué Es el Web Scraping? Cómo Extraer Legalmente el Contenido de la Web
+AutorJeremy Holcombe Actualizado octubre 1, 2025
+¿Qué Es el Web Scraping? Cómo Extraer Legalmente el Contenido de la Web
+Tabla de contenidos
+¿Qué Es el Web Scraping?
+¿Para Qué Se Utiliza el Web Scraping?
+¿Cómo Funciona el Scraping Web?
+Descargar el artículo en PDF
+¿Alguna vez has querido comparar precios de varios sitios a la vez? ¿O tal vez extraer automáticamente una colección de posts de tu blog favorito? Todo es posible con el web scraping.
+
+El web scraping se refiere al proceso de extracción de contenidos y datos de sitios web mediante software. Por ejemplo, la mayoría de los servicios de comparación de precios utilizan web scrapers para leer la información de precios de varias tiendas online. Otro ejemplo es Google, que rutinariamente scrapea o «rastrea» la web para indexar sitios web.
+
+Por supuesto, estos son sólo dos de los muchos casos de uso del web scraping. En este artículo, nos sumergiremos en el mundo de los web scrapers, aprenderemos cómo funcionan y veremos cómo algunos sitios web intentan bloquearlos. ¡Sigue leyendo para saber más y empezar a scrapear!
+
+¿Qué Es el Web Scraping?
+El web scraping es un conjunto de prácticas utilizadas para extraer automáticamente — o «scrapear» — datos de la web.
+
+Una imagen que muestra cómo el web scraping utiliza programas informáticos para recopilar datos de los sitios web
+El web scraping utiliza programas informáticos para recoger datos de los sitios web
+Otros términos para referirse al web scraping son «scraping de contenidos» o «scraping de datos» Independientemente de cómo se llame, el web scraping es una herramienta extremadamente útil para la recopilación de datos online. Las aplicaciones del web scraping incluyen la investigación de mercado, la comparación de precios, la supervisión de contenidos y mucho más.
+
+¿Pero qué es exactamente lo que «scrapea» el web scraping — y cómo es posible? ¿Es incluso legal? ¿Querría un sitio web que alguien viniera a scrapear sus datos?
+
+Las respuestas dependen de varios factores. Sin embargo, antes de sumergirnos en los métodos y casos de uso, veamos más de cerca qué es el web scraping y si es ético o no.
+
+¿Qué Podemos «Scrapear» de la Web?
+Es posible scrapear todo tipo de datos de la web. Desde los motores de búsqueda y los feeds RSS hasta la información gubernamental, la mayoría de los sitios web ponen sus datos a disposición de los scrapers, crawlers y otras formas de recopilación automática de datos.
+
+Estos son algunos ejemplos comunes.
+
+Algunos de los muchos tipos de datos que se pueden scrapear de la web
+Tipos de datos que puedes scrapear de la web
+Sin embargo, eso no significa que estos datos estén siempre disponibles. Dependiendo del sitio web, puede que tengas que emplear algunas herramientas y trucos para obtener exactamente lo que necesitas — suponiendo que los datos sean accesibles en primer lugar. Por ejemplo, muchos scrapers web no pueden extraer datos significativos del contenido visual.
+
+En los casos más sencillos, el scraping web puede hacerse a través de la API o interfaz de programación de aplicaciones de un sitio web. Cuando un sitio web pone a disposición su API, los desarrolladores web pueden utilizarla para extraer automáticamente datos y otra información útil en un formato conveniente. Es casi como si el host de la web te proporcionara tu propio «conducto» hacia sus datos. ¡Esto sí que es hospitalidad!
+
+Por supuesto, no siempre es así — y muchos de los sitios web que quieres scrapear no tienen una API que puedas utilizar. Además, incluso los sitios web que tienen una API no siempre te proporcionarán los datos en el formato adecuado.
+
+En consecuencia, el web scraping sólo es necesario cuando los datos de la web que quieres no están disponibles en la forma que necesitas. Tanto si eso significa que los formatos que quieres no están disponibles, como si el sitio web simplemente no proporciona todo el alcance de los datos, el web scraping permite obtener lo que quieres.
+
+Aunque eso está muy bien, también plantea una cuestión importante: Si ciertos datos de la web están restringidos, ¿es legal scrapearlos? Como veremos en breve, puede ser una zona un poco gris.
+
+¿Es Legal el Web Scraping?
+Para algunas personas, la idea de scrapear la web puede parecer casi un robo. Después de todo, ¿quién eres tú para «coger» los datos de otra persona?
+
+Afortunadamente, no hay nada intrínsecamente ilegal en el web scraping. Cuando un sitio web publica datos, normalmente están disponibles para el público y, por tanto, son libres de ser scrapeados.
+
+Por ejemplo, dado que Amazon pone a disposición del público los precios de los productos, es perfectamente legal scrapear los datos de los precios. Muchas aplicaciones de compra populares y extensiones de navegador utilizan el web scraping con este mismo propósito, para que los usuarios sepan que están obteniendo el precio correcto.
+
+Sin embargo, no todos los datos de la web están hechos para el público, lo que significa que no todos los datos de la web son legales para scrapear. Cuando se trata de datos personales y de propiedad intelectual, el web scraping puede convertirse rápidamente en web scraping malicioso, lo que puede dar lugar a sanciones como un aviso de retirada de la DMCA.
+
+¿Qué Es el Web Scraping Malicioso?
+El web scraping malintencionado es el web scraping que el editor no pretendía o no consintió compartir. Aunque estos datos suelen ser datos personales o de propiedad intelectual, el scraping malicioso puede aplicarse a cualquier cosa que no esté destinada al público.
+
+Como puedes imaginar, esta definición tiene una zona gris. Mientras que muchos tipos de datos personales están protegidos por leyes como el Reglamento General de Protección de Datos (GDPR) y la Ley de Privacidad del Consumidor de California (CCPA), otros no lo están. Pero eso no significa que no existan situaciones en las que no sea legal su scrapeado.
+
+La CCPA mantiene unas normas estrictas para el tratamiento de los datos personales
+La CCPA mantiene normas estrictas para el manejo de datos personales
+Por ejemplo, supongamos que un alojamiento web pone «accidentalmente» a disposición del público la información de sus usuarios. Eso podría incluir una lista completa de nombres, correos electrónicos y otra información que es técnicamente pública, pero que tal vez no estaba destinada a ser compartida.
+
+Aunque también sería técnicamente legal scrapear estos datos, probablemente no sea la mejor idea. El hecho de que los datos sean públicos no significa necesariamente que el administrador de la web haya consentido que se hayan scrapeado, aunque su falta de supervisión los haya hecho públicos.
+
+Esta «zona gris» ha dado al «web scraping» una reputación algo mixta. Aunque el web scraping es definitivamente legal, puede utilizarse fácilmente con fines maliciosos o poco éticos. Por ello, a muchos proveedores de servicios web no les gusta que sus datos sean scrapeados, independientemente de que sea legal.
+
+Otro tipo de web scraping malintencionado es el «over-scraping», en el que los scrapeadores envían demasiadas solicitudes en un periodo determinado. Demasiadas solicitudes pueden suponer una gran carga para los proveedores de servicios web, que prefieren gastar los recursos del servidor en personas reales que en bots de scrapeado.
+
+Como regla general, utiliza el web scraping con moderación y sólo cuando estés completamente seguro de que los datos son de uso público. Recuerda que el hecho de que los datos estén disponibles públicamente no significa que sea legal o ético scrapearlos.
+
+¿Para Qué Se Utiliza el Web Scraping?
+En el mejor de los casos, el web scraping sirve para muchos propósitos útiles en muchas industrias. En 2021, casi la mitad del web scraping se utiliza para reforzar las estrategias de comercio electrónico.
+
+El scraping web se utiliza en todos los sectores, desde el comercio electrónico hasta el inmobiliario
+El web scraping se utiliza en todos los sectores, desde el comercio electrónico hasta el inmobiliario (Fuente: Datahut)
+El web scraping se ha convertido en la columna vertebral de muchos procesos basados en datos, desde el seguimiento de las marcas y las comparaciones de precios actualizadas hasta la realización de valiosos estudios de mercado. He aquí algunos de los más comunes.
+
+Estudio de Mercado
+¿Qué hacen tus clientes? ¿Y tus clientes potenciales? ¿Cómo son los precios de tus competidores en comparación con los tuyos? ¿Tienes información para crear una campaña exitosa de inbound marketing o marketing de contenidos?
+
+Éstas son sólo algunas de las preguntas que constituyen la piedra angular de la investigación de mercado — y las mismas que pueden responderse con el web scraping. Dado que muchos de estos datos están disponibles públicamente, el web scraping se ha convertido en una herramienta inestimable para los equipos de marketing que buscan vigilar su mercado sin tener que realizar una investigación manual que requiere mucho tiempo.
+
+Automatización del Negocio
+Muchas de las ventajas del web scraping para la investigación de mercado también se aplican a la automatización empresarial.
+
+Cuando muchas tareas de automatización empresarial requieren la recopilación y el procesamiento de grandes cantidades de datos, el web scraping puede ser muy valioso — especialmente si hacerlo de otro modo es engorroso.
+
+Por ejemplo, supongamos que necesitas reunir datos de diez sitios web diferentes. Aunque recojas el mismo tipo de datos de cada uno, cada sitio web puede requerir un método de extracción diferente. En lugar de pasar manualmente por diferentes procesos internos en cada sitio web, podrías utilizar un web scraper para hacerlo automáticamente.
+
+Generación de Leads
+Como si la investigación de mercado y la automatización del negocio no fueran suficientes, el web scraping también puede generar valiosas listas de clientes potenciales con poco esfuerzo.
+
+Aunque tendrás que establecer tus objetivos con cierta precisión, puedes utilizar el web scraping para generar suficientes datos de usuarios para crear listas de leads estructuradas. Los resultados pueden variar, por supuesto, pero es más conveniente (y más prometedor) que crear listas de leads por tu cuenta.
+
+Seguimiento de Precios
+La extracción de precios — también conocida como scraping de precios — es una de las aplicaciones más comunes del web scraping.
+
+He aquí un ejemplo de la popular aplicación de seguimiento de precios de Amazon Camelcamelcamel. La aplicación extrae regularmente los precios de los productos y luego los compara en un gráfico a lo largo del tiempo.
+
+El historial de precios de Amazon se muestra en la aplicación de seguimiento de precios Camelcamelcamel
+Historial de precios de Amazon mostrado en la aplicación de seguimiento de precios Camelcamelcamel
+Los precios pueden fluctuar mucho, incluso a diario (¡mira la repentina caída de los precios en torno al 9 de mayo!). Con el acceso a las tendencias históricas de los precios, los usuarios pueden comprobar si el precio que están pagando es el ideal. En este ejemplo, el usuario podría optar por esperar una semana más o menos con la esperanza de ahorrar 10$.
+
+A pesar de su utilidad, el scraping de precios conlleva cierta controversia. Como mucha gente quiere actualizaciones de precios en tiempo real, algunas aplicaciones de seguimiento de precios se convierten rápidamente en maliciosas al sobrecargar ciertos sitios web con peticiones al servidor.
+
+Como resultado, muchos sitios web de comercio electrónico han empezado a tomar medidas adicionales para bloquear totalmente a los web scraping, que trataremos en la siguiente sección.
+
+Noticias y Contenidos
+No hay nada más valioso que mantenerse informado. Desde el control de la reputación hasta el seguimiento de las tendencias del sector, el web scraping es una valiosa herramienta para mantenerse informado.
+
+Aunque algunos sitios web de noticias y blogs ya ofrecen canales RSS y otras interfaces sencillas, no siempre son la norma — ni son tan comunes como antes. En consecuencia, la agregación de las noticias y contenidos exactos que necesitas suele requerir alguna forma de web scraping.
+
+Monitorización de la Marca
+Mientras estás scrapeando las noticias, ¿por qué no controlar tu marca? En el caso de las marcas que reciben mucha cobertura informativa, el web scraping es una herramienta inestimable para estar al día sin tener que revisar innumerables artículos y sitios de noticias.
+
+El web scraping también es útil para comprobar el precio mínimo disponible de un producto o servicio de una marca (MAP). Aunque esto es técnicamente una forma de scraping de precios, es una información clave que puede ayudar a las marcas a determinar si sus precios se ajustan a las expectativas de los clientes.
+
+Inmobiliaria
+Si alguna vez has buscado un apartamento o has comprado una casa, sabes lo mucho que hay que clasificar. Con miles de anuncios dispersos en múltiples sitios web inmobiliarios, puede ser difícil encontrar exactamente lo que buscas.
+
+Se pueden recopilar muchos tipos de datos inmobiliarios con el web scraping
+Web Scraping de datos inmobiliarios
+Muchos sitios web utilizan el «web scraping» para agregar listados inmobiliarios en una única base de datos para facilitar el proceso. Algunos ejemplos populares son Zillow y Trulia, aunque hay muchos otros que siguen un modelo similar.
+
+Sin embargo, la agregación de listados no es el único uso del web scraping en el sector inmobiliario. Por ejemplo, los agentes inmobiliarios pueden utilizar las aplicaciones de scraping para estar al tanto de los precios medios de alquiler y venta, los tipos de propiedades que se venden y otras tendencias valiosas.
+
+¿Cómo Funciona el Scraping Web?
+El scraping web puede parecer complicado, pero en realidad es muy sencillo.
+
+Aunque los métodos y las herramientas pueden variar, todo lo que tienes que hacer es encontrar una manera de (1) navegar automáticamente por tu(s) sitio(s) web de destino y (2) extraer los datos una vez que estés allí. Normalmente, estos pasos se realizan con scrapers y crawlers.
+
+Scrapeadores y Crawlers
+En principio, el web scraping funciona casi igual que el caballo y el arado.
+
+Un crawler y un scraper son similares a un caballo y un arado
+Un crawler y un scraper son similares a un caballo y un arado
+A medida que el caballo guía el arado, éste gira y rompe la tierra, ayudando a abrir paso a nuevas semillas, a la vez que reincorpora al suelo las malas hierbas y los residuos de las cosechas no deseadas.
+
+Aparte del caballo, el web scraping no es muy diferente. En este caso, el crawler desempeña el papel del caballo, guiando al scraper  — efectivamente nuestro arado  — a través de nuestros campos digitales.
+
+Esto es lo que hacen ambos.
+
+Crawlers (a veces conocidos como arañas) son programas básicos que navegan por la web buscando e indexando contenidos. Aunque los crawlers(rastreadores) guían a los web scrapers, no se utilizan exclusivamente para este fin. Por ejemplo, los motores de búsqueda como Google utilizan rastreadores para actualizar los índices y las clasificaciones de los sitios web. Los rastreadores suelen estar disponibles como herramientas preconstruidas que permiten especificar un determinado sitio web o término de búsqueda.
+Los scrapers hacen el trabajo sucio de extraer rápidamente la información relevante de los sitios web. Dado que los sitios web están estructurados en HTML, los scrapers utilizan expresiones regulares (regex), XPath, selectores CSS y otros localizadores para encontrar y extraer rápidamente determinados contenidos. Por ejemplo, puedes dar a tu web scraper una expresión regular que especifique el nombre de una marca o una palabra clave.
+Si esto suena un poco abrumador, no te preocupes. La mayoría de las herramientas de web scraping incluyen rastreadores y scrapers integrados, lo que facilita la realización de los trabajos más complicados.
+
+Proceso Básico del Web Scraping
+En su nivel más básico, el web scraping se reduce a unos simples pasos:
+
+Especifica las URLs de los sitios web y las páginas que quieres scrapear
+Haz una petición HTML a las URL (es decir, «visita» las páginas)
+Utiliza localizadores como expresiones regulares para extraer la información deseada del HTML
+Guarda los datos en un formato estructurado (como CSV o JSON)
+Como veremos en la siguiente sección, se puede utilizar una amplia gama de herramientas de web scraping para realizar estos pasos automáticamente.
+
+Sin embargo, no siempre es tan sencillo — especialmente cuando se realiza el web scraping a gran escala. Uno de los mayores retos del web scraping es mantener tu scraper actualizado a medida que los sitios web cambian de diseño o adoptan medidas anti-scraping (no todo puede ser perenne). Aunque esto no es demasiado difícil si sólo scrapeas unos pocos sitios web a la vez, scrapear más puede convertirse rápidamente en una complicación.
+
+Para minimizar el trabajo extra, es importante entender cómo los sitios web intentan bloquear a los scrapers — algo que aprenderemos en la siguiente sección.
+
+Herramientas de Web Scraping
+Muchas funciones de web scraping están disponibles en forma de herramientas de web scraping. Aunque hay muchas herramientas disponibles, varían mucho en cuanto a calidad, precio y (por desgracia) ética.
+
+Herramientas populares de web scraping clasificadas por caso de uso
+Herramientas populares de web scraping clasificadas por caso de uso
+En cualquier caso, un buen web scraping será capaz de extraer de forma fiable los datos que necesitas sin toparse con demasiadas medidas anti-scraping. Aquí tienes algunas características clave que debes buscar.
+
+Localizadores precisos: Los web scrapers utilizan localizadores como expresiones regulares y selectores CSS para extraer datos específicos. La herramienta que elijas debe permitirte varias opciones para especificar lo que buscas.
+Calidad de los datos: La mayoría de los datos de la web no están estructurados, aunque se presenten claramente al ojo humano. Trabajar con datos no estructurados no sólo es desordenado, sino que rara vez ofrece buenos resultados. Asegúrate de buscar herramientas de scraping que limpien y clasifiquen los datos en bruto antes de su entrega.
+Entrega de datos: Dependiendo de tus herramientas o flujos de trabajo existentes, probablemente necesitarás los datos scrapeados en un formato específico, como JSON, XML o CSV. En lugar de convertir los datos en bruto tú mismo, busca herramientas con opciones de entrega de datos en los formatos que necesitas.
+Manejo del anti-scraping: El web scraping es tan eficaz como su capacidad para evitar los bloqueos. Aunque es posible que tengas que emplear herramientas adicionales, como proxies y VPN, para desbloquear sitios web, muchas herramientas de web scraping lo consiguen haciendo pequeñas modificaciones en sus rastreadores.
+Precios transparentes: Aunque algunas herramientas de web scraping son de uso gratuito, las opciones más robustas tienen un precio. Presta mucha atención al esquema de precios, especialmente si pretendes escalar y scrapear muchos sitios.
+Asistencia al cliente: Aunque utilizar una herramienta preconstruida es muy cómodo, no siempre podrás solucionar los problemas tú mismo. Por ello, asegúrate de que tu proveedor también ofrece un servicio de atención al cliente fiable y recursos para la resolución de problemas.
+Entre las herramientas de web scraping más populares están Octoparse, Import.io y Parsehub.
+
+Protección Contra el Scraping Web
+Cambiemos un poco las tornas: Supongamos que eres un administrador web pero no quieres que otras personas utilicen todos estos métodos inteligentes para scrapear tus datos. ¿Qué puedes hacer para protegerte?
+
+Más allá de los plugins de seguridad básicos, hay algunos métodos eficaces para bloquear los scrapers y rastreadores web.
+
+Bloquea los bots con estas técnicas comunes de anti-scraping
+Técnicas habituales contra el scraping
+Bloqueo de direcciones IP: Muchos proveedores de alojamiento web hacen un seguimiento de las direcciones IP de sus visitantes. Si un host observa que un visitante concreto está generando muchas peticiones al servidor (como en el caso de algunos scrapers o bots), puede bloquear la IP por completo. Sin embargo, los scrapers pueden superar estos bloqueos cambiando su dirección IP a través de un proxy o una VPN.
+Configurar el archivo robots.txt: Un archivo robots.txt permite a un anfitrión web indicar a los scrapers, crawlers y otros bots a qué pueden y no pueden acceder. Por ejemplo, algunos sitios web utilizan un archivo robots.txt para mantenerse privados, indicando a los motores de búsqueda que no los indexen. Aunque la mayoría de los motores de búsqueda respetan estos archivos, muchas formas maliciosas de web scraping no lo hacen.
+Filtrado de solicitudes: Cada vez que alguien visita un sitio web, está «solicitando» una página HTML al servidor web. Estas peticiones suelen ser visibles para los servidores web, que pueden ver ciertos factores de identificación, como las direcciones IP y user agents, como los navegadores web. Aunque ya hemos hablado del bloqueo de IPs, los servidores web también pueden filtrar por agente de usuario.
+Por ejemplo, si un proveedor de alojamiento web observa que hay muchas solicitudes del mismo usuario que ejecuta una versión de Mozilla Firefox muy anticuada, podría simplemente bloquear esa versión y, al hacerlo, bloquear el bot. Estas capacidades de bloqueo están disponibles en la mayoría de los planes de alojamiento gestionado.
+
+Mostrar un Captcha: ¿Alguna vez has tenido que escribir una extraña cadena de texto o hacer clic en al menos seis veleros antes de acceder a una página? Entonces te has encontrado con un «Captcha» o completely automated public Turing test for telling computers and humans apart. Aunque sean simples, son increíblemente eficaces para filtrar a los scrapers de la web y otros bots.
+Los «honeypots»: Un «honeypot» es un tipo de trampa utilizada para atraer e identificar a los visitantes no deseados. En el caso de los web scraping, un administrador  web puede incluir enlaces invisibles en su página web. Aunque los usuarios humanos no se darán cuenta, los bots los visitarán automáticamente al desplazarse, lo que permitirá a los admiinistradores web recopilar (y bloquear) sus direcciones IP o agentes de usuario.
+Ahora volvamos a darle la vuelta a la tortilla. ¿Qué puede hacer un scraper para superar estas protecciones?
+
+Aunque algunas medidas anti-scraping son difíciles de eludir, hay un par de métodos que suelen funcionar con frecuencia. Estos implican cambiar de alguna manera las características de identificación de tu scraper.
+
+Una imagen de AI Múltiples proxies pueden ayudar a evitar las prohibiciones de IP y escalar los esfuerzos de web scraping
+Los proxies pueden ayudar a evitar las prohibiciones de IP y a ampliar los esfuerzos de web scraping
+Utiliza un proxy o una VPN: Dado que muchos alojamientos web bloquean a los web scraping en función de su dirección IP, a menudo es necesario utilizar varias direcciones IP para garantizar el acceso. Los proxies y las redes privadas virtuales (VPN) son ideales para esta tarea, aunque tienen algunas diferencias clave.
+Visita regularmente tus objetivos: La mayoría (si es que hay alguno) de los scrapers web te dirán cuando han sido bloqueados. Por lo tanto, es importante que compruebes regularmente desde dónde estás haciendo el scrapeo para ver si te han bloqueado o si el formato del sitio web ha cambiado. Ten en cuenta que una de estas cosas está prácticamente garantizada en algún momento.
+Por supuesto, ninguna de estas medidas es necesaria si utilizas el web scraping de forma responsable. Si decides llevar a cabo el web scraping, ¡recuerda scrapea con moderación y respetar a tus anfitriones web!
+
+Resumen
+Aunque el web scraping es una herramienta poderosa, también supone una poderosa amenaza para muchos servidores web. Independientemente del lado del servidor en el que te encuentres, todo el mundo tiene interés en asegurarse de que el web scraping se utiliza de forma responsable y, por supuesto, para el bien.
+
+Si eres un proveedor de alojamiento web que quiere controlar a los web scraping, no busques más que los planes de alojamiento gestionado de Kinsta. Puedes limitar los bots y salvaguardar datos y recursos valiosos con muchas herramientas de control de acceso disponibles.
+
+Para obtener más información, programa una demo gratuita o ponte en contacto con un experto en alojamiento web de Kinsta hoy mismo.
+
+Potencia tu sitio con el alojamiento Administrado de WordPress de Kinsta, diseñado para ofrecer velocidad, seguridad y simplicidad. Con Kinsta, obtienes:
+
+Control simplificado a través del panel MyKinsta
+Migraciones gratuitas ilimitadas, gestionadas por nuestro equipo de expertos en migraciones
+Soporte 24/7/365 de expertos en WordPress
+Infraestructura premium de Google Cloud
+Seguridad de nivel empresarial mediante la integración con Cloudflare
+Alcance mundial con 37 centros de datos
+¡Disfruta de tu primer mes gratis!
+
+
+Jeremy Holcombe
+Kinsta
+Editor de Contenidos y Marketing en Kinsta, Desarrollador Web de WordPress y Redactor de Contenidos. Aparte de todo lo relacionado con WordPress, me gusta la playa, el golf y el cine. También tengo problemas con la gente alta ;).
+
+LinkedIn
+Alojamiento líder de WordPress en G2 🥇
+Únete a Kinsta y disfruta de una velocidad, seguridad y soporte inigualables.
+
+Consigue tu mes GRATIS
+Artículos y Temas Relacionados
+
+Déjame pintarte la escena: una tarde cualquiera, frente al portátil, con el café recién hecho y una hoja de cálculo tan vacía como la nevera después de un finde largo. El equipo de ventas pidiendo precios de la competencia, marketing reclamando leads frescos y operaciones exigiendo listados de productos de mil sitios... y todo para ayer. Sabes que la info está ahí fuera, pero conseguirla es otro cantar. Si alguna vez sentiste que tu vida era un bucle infinito de copiar y pegar, créeme, no eres el único.
+
+Extrae datos web en solo 2 clics.
+Pensado para equipos de ventas y operaciones. Impulsado por IA.
+Scrape web data in just 2 clicks.
+Hoy la historia es otra. El web scraping ha pasado de ser cosa de frikis a convertirse en una herramienta clave para cualquier negocio. JavaScript y Node.js están en el centro de la movida, desde scripts sencillos hasta pipelines de datos de lo más complejos. Eso sí, aunque las herramientas han evolucionado un montón, la curva de aprendizaje puede asustar. Así que, seas de negocio, fan de los datos o simplemente estés harto de meter datos a mano, esta guía es para ti. Te voy a contar cómo funciona el ecosistema, las librerías que no pueden faltar, los retos más comunes y por qué, en muchos casos, lo más sensato es dejar que la IA haga el trabajo duro.
+
+¿Por qué el Web Scraping con JavaScript y Node.js es tan importante para las empresas?
+Vamos al grano: en 2025, los datos web no son un extra, son la base. Según estudios recientes, el 73% de las empresas reconocen que los datos públicos de la web les permiten tomar decisiones más rápidas y acertadas, y cerca del 42% del presupuesto de datos ya se destina a recolectar datos web. El mercado de datos alternativos (donde el web scraping es protagonista) ya mueve $4.9 mil millones y sigue creciendo a buen ritmo.
+
+¿A qué se debe este boom de datos? Aquí tienes algunos de los usos más habituales en empresas:
+
+Precios competitivos y e-commerce: Las tiendas monitorizan a la competencia para ajustar precios e inventario, logrando a veces subir ventas en más del 4%.
+Generación de leads e inteligencia comercial: Los equipos de ventas automatizan la búsqueda de emails, teléfonos y datos de empresas en directorios y redes sociales.
+Investigación de mercado y agregación de contenido: Analistas extraen noticias, reseñas y datos de sentimiento para detectar tendencias y anticiparse.
+Publicidad y tecnología publicitaria: Las agencias vigilan anuncios y campañas de la competencia en tiempo real.
+Inmobiliaria y viajes: Las agencias recopilan listados, precios y opiniones para alimentar modelos de valoración y análisis de mercado.
+Agregadores de contenido y datos: Plataformas que juntan info de muchas fuentes para crear comparadores y dashboards.
+JavaScript y Node.js se han convertido en la opción favorita para todo esto, sobre todo porque cada vez más webs dependen de contenido dinámico generado por JavaScript. Node.js es ideal para scraping a gran escala gracias a su manejo de operaciones asíncronas. Y con su ecosistema de librerías, puedes montar desde scripts rápidos hasta raspadores de nivel profesional.
+
+Qué es el Data Scraping y cómo hacerlo en 2025
+El proceso básico: ¿Cómo funciona el Web Scraping con JavaScript y Node.js?
+Vamos a quitarle el misterio al proceso típico de scraping. Da igual si quieres datos de un blog sencillo o de un e-commerce lleno de JavaScript, los pasos suelen ser los mismos:
+
+Enviar petición: Usas un cliente HTTP para pedir la página (por ejemplo, axios, node-fetch o got).
+Recibir respuesta: Te llega el HTML (o a veces JSON) del servidor.
+Gestionar contenido dinámico: Si la página se genera con JavaScript, tiras de un navegador sin interfaz (como Puppeteer o Playwright) para ejecutar scripts y ver el contenido final.
+Parsear HTML/DOM: Usas un parser (cheerio, jsdom) para convertir el HTML en algo que puedas consultar.
+Extraer datos: Con selectores o regex, sacas los campos que te interesan.
+Guardar datos: Guardas los resultados en un archivo, base de datos o en la nube.
+Cada paso tiene sus propias herramientas y trucos, que te cuento a continuación.
+
+Librerías clave de peticiones HTTP para Web Scraping en JavaScript
+El primer paso de cualquier raspador web es hacer peticiones HTTP. Node.js te da un montón de opciones, desde las clásicas hasta las más modernas. Aquí tienes las más usadas:
+
+1. Axios
+Cliente HTTP basado en promesas para Node y navegadores. Es el "todoterreno" para la mayoría de necesidades de scraping.
+
+Consigue leads y otros datos en solo 2 clics.
+Pensado para equipos de ventas y operaciones. Impulsado por IA.
+Ventajas: Muy completo, soporta async/await, parsea JSON automáticamente, tiene interceptores y proxies.
+
+Desventajas: Algo más pesado, a veces maneja los datos de forma poco clara.
+
+2. node-fetch
+Implementa la API fetch del navegador en Node.js. Minimalista y moderno.
+
+Ventajas: Ligero, API familiar si vienes del frontend.
+
+Desventajas: Pocas funciones, manejo de errores manual, configurar proxies es más lioso.
+
+3. SuperAgent
+Una librería veterana con una API encadenable.
+
+Ventajas: Muy madura, soporta formularios, subida de archivos y plugins.
+
+Desventajas: API algo antigua, dependencia más grande.
+
+4. Unirest
+Cliente HTTP sencillo y neutral.
+
+Ventajas: Sintaxis fácil, ideal para scripts rápidos.
+
+Desventajas: Menos funciones, comunidad menos activa.
+
+5. Got
+Cliente HTTP robusto y rápido para Node.js, con funciones avanzadas.
+
+Ventajas: Rápido, soporta HTTP/2, reintentos y streams.
+
+Desventajas: Solo para Node, la API puede ser densa para quien empieza.
+
+6. http/https nativo de Node
+Siempre puedes ir a lo básico, sin dependencias externas.
+
+Ventajas: Sin dependencias.
+
+Desventajas: Verboso, basado en callbacks, sin promesas.
+
+Consulta una comparativa detallada y ejemplos de código aquí.
+¿Cómo elegir el cliente HTTP ideal para tu proyecto?
+¿Qué mirar?
+
+Facilidad de uso: Axios y Got tienen sintaxis limpia y soportan async/await.
+Rendimiento: Got y node-fetch son ligeros y van genial para scraping concurrente.
+Soporte de proxies: Axios y Got facilitan la rotación de proxies.
+Manejo de errores: Axios lanza errores HTTP por defecto; node-fetch requiere que los gestiones tú.
+Comunidad: Axios y Got tienen comunidades activas y muchos ejemplos.
+Recomendaciones rápidas:
+
+Para scripts rápidos o prototipos: node-fetch o Unirest.
+Para scraping en producción: Axios (por sus funciones) o Got (por rendimiento).
+Para automatización de navegador: Puppeteer o Playwright gestionan las peticiones por dentro.
+Parseo de HTML y extracción de datos: Cheerio, jsdom y compañía
+Cuando ya tienes el HTML, toca convertirlo en algo manejable. Aquí entran los parsers.
+
+Cheerio
+Cheerio es como jQuery pero para el servidor. Rápido, ligero y perfecto para HTML estático.
+
+Ventajas: Muy rápido, API familiar, tolera HTML desordenado.
+
+Desventajas: No ejecuta JavaScript, solo ve el HTML que recibe.
+
+Descubre más sobre la velocidad y casos de uso de Cheerio.
+
+video-bg
+jsdom
+jsdom simula un DOM de navegador en Node.js. Puede ejecutar scripts sencillos y es más "navegador" que Cheerio.
+
+Ventajas: Puede ejecutar scripts, soporta toda la API DOM.
+
+Desventajas: Más lento y pesado que Cheerio, no es un navegador completo.
+
+Compara Cheerio y jsdom en detalle.
+
+¿Cuándo usar expresiones regulares u otros métodos de parseo?
+Las regex en scraping son como el picante: bien usadas, mejoran el plato, pero no te pases. Son útiles para:
+
+Sacar patrones de texto (emails, teléfonos, precios).
+Limpiar o validar datos extraídos.
+Extraer datos de bloques de texto o etiquetas script.
+Pero no intentes parsear HTML completo con regex: para eso, mejor un parser DOM. Más consejos sobre regex en scraping.
+
+Cómo lidiar con sitios dinámicos: Puppeteer, Playwright y navegadores sin interfaz
+Hoy en día, muchas webs dependen de JavaScript. A veces, los datos que buscas no están en el HTML inicial, sino que se generan después de cargar la página. Aquí entran los navegadores headless.
+
+Puppeteer
+Librería de Node.js de Google para controlar Chrome/Chromium. Es como tener un robot que navega y hace clics por ti.
+
+Ventajas: Renderizado completo de Chrome, API sencilla, ideal para contenido dinámico.
+
+Desventajas: Solo Chromium, consume más recursos.
+
+Lee más sobre las ventajas de Puppeteer.
+
+Playwright
+Librería más reciente de Microsoft, compatible con Chromium, Firefox y WebKit. Es como el primo moderno y multiplataforma de Puppeteer.
+
+Ventajas: Multinavegador, contextos paralelos, espera automática de elementos.
+
+Desventajas: Curva de aprendizaje algo mayor, instalación más pesada.
+
+Por qué Playwright está ganando popularidad.
+
+Nightmare
+Herramienta de automatización basada en Electron. API sencilla, pero ya no se mantiene. Úsala solo en proyectos antiguos.
+
+Comparativa de navegadores headless
+Aspecto	Puppeteer (Chrome)	Playwright (Multinavegador)	Nightmare (Electron)
+Soporte de navegador	Chrome/Edge	Chrome, Firefox, WebKit	Chrome (antiguo)
+Rendimiento y escalabilidad	Rápido, pero pesado	Rápido, mejor en paralelo	Más lento, menos estable
+Scraping dinámico	Excelente	Excelente + más funciones	Aceptable para sitios simples
+Mantenimiento	Muy activo	Muy activo	Obsoleto
+Ideal para	Scraping en Chrome	Proyectos complejos y multiplataforma	Scripts simples y antiguos
+Mi consejo: Si vas a empezar un proyecto nuevo y complejo, tira de Playwright. Puppeteer sigue siendo top para tareas solo en Chrome. Nightmare, solo si tienes scripts viejos que mantener.
+
+Herramientas extra: programación, entorno, CLI y almacenamiento de datos
+Un raspador web de verdad es mucho más que solo sacar y parsear datos. Aquí van algunas herramientas que uso siempre:
+
+Programación de tareas: node-cron
+Programa tus scrapers para que se ejecuten solos.
+
+node-cron es ideal para automatizar tareas repetitivas.
+
+Gestión de entorno: dotenv
+Guarda claves y configuraciones fuera del código.
+
+Herramientas CLI: chalk, commander, inquirer
+chalk: Colorea la consola.
+commander: Analiza opciones de línea de comandos.
+inquirer: Prompts interactivos para el usuario.
+video-bg
+Almacenamiento de datos
+fs: Escribe archivos (JSON, CSV).
+lowdb: Base de datos JSON ligera.
+sqlite3: Base de datos SQL local.
+mongodb: Base de datos NoSQL para proyectos grandes.
+Los retos del Web Scraping tradicional con JavaScript y Node.js
+Seamos claros: el scraping tradicional no es un paseo. Estos son los principales dolores de cabeza que me he comido (y seguro que tú también):
+
+Curva de aprendizaje alta: Hay que dominar el DOM, selectores, lógica asíncrona y los caprichos de los navegadores.
+Mantenimiento constante: Las webs cambian, los selectores se rompen y toca arreglar el código una y otra vez.
+Escalabilidad limitada: Cada web necesita su propio script; no hay una receta mágica.
+Limpieza de datos complicada: Los datos suelen venir desordenados; limpiarlos y formatearlos lleva su tiempo.
+Límites de rendimiento: Automatizar navegadores es lento y consume muchos recursos si tienes mucho volumen.
+Bloqueos y anti-bots: Las webs bloquean raspadores, lanzan CAPTCHAs o esconden datos tras logins.
+Aspectos legales y éticos: Hay que tener ojo con los términos de uso, privacidad y normativas.
+Lee más sobre estos retos y estadísticas reales.
+
+Thunderbit vs. Web Scraping tradicional: productividad a otro nivel
+Ahora vamos al grano: ¿y si pudieras olvidarte del código, los selectores y el mantenimiento?
+
+Ahí entra Thunderbit. Como cofundador y CEO, reconozco que no soy imparcial, pero escúchame: Thunderbit está pensado para gente de negocio que quiere datos, no dolores de cabeza.
+
+video-bg
+¿Cómo se compara Thunderbit?
+Aspecto	Thunderbit (IA sin código)	Scraping tradicional JS/Node
+Configuración	2 clics, sin código	Escribir scripts, depurar
+Contenido dinámico	Gestionado en el navegador	Scripting con navegador headless
+Mantenimiento	La IA se adapta a cambios	Actualizaciones manuales de código
+Extracción de datos	IA sugiere campos	Selectores manuales
+Scraping de subpáginas	Integrado, 1 clic	Bucle y código por sitio
+Exportación	Excel, Sheets, Notion	Integración manual de archivos/BD
+Post-procesado	Resumir, etiquetar, formatear	Código extra o herramientas
+Quién puede usarlo	Cualquiera con navegador	Solo desarrolladores
+La IA de Thunderbit lee la página, sugiere campos y extrae datos en un par de clics. Gestiona subpáginas, se adapta a cambios de diseño y puede incluso resumir, etiquetar o traducir los datos mientras los saca. Puedes exportar a Excel, Google Sheets, Airtable o Notion, sin líos técnicos.
+
+Casos donde Thunderbit brilla:
+
+Equipos de e-commerce que monitorizan SKUs y precios de la competencia
+Equipos de ventas que sacan leads y contactos
+Investigadores de mercado que agregan noticias o reseñas
+Agentes inmobiliarios que recopilan listados y detalles de propiedades
+Para scraping frecuente y crítico para el negocio, Thunderbit ahorra un montón de tiempo. Para proyectos muy a medida, a gran escala o con integraciones profundas, el scripting tradicional sigue teniendo su sitio, pero para la mayoría de equipos, Thunderbit es el camino más rápido del "necesito datos" al "ya los tengo".
+
+Mira la extensión de Chrome de Thunderbit en acción o descubre más casos de uso en el Blog de Thunderbit.
+
+Prueba Thunderbit Raspador Web IA
+Guía rápida: librerías populares de Web Scraping en JavaScript y Node.js
+Aquí tienes un resumen de las librerías más top para scraping en JavaScript en 2025:
+
+Peticiones HTTP
+Axios: Cliente HTTP basado en promesas y muy completo.
+node-fetch: API Fetch para Node.js.
+Got: Cliente HTTP rápido y avanzado.
+SuperAgent: Peticiones HTTP encadenables y maduras.
+Unirest: Cliente sencillo y neutral.
+Parseo de HTML
+Cheerio: Parser HTML rápido, estilo jQuery.
+jsdom: DOM de navegador en Node.js.
+Contenido dinámico
+Puppeteer: Automatización de Chrome sin interfaz.
+Playwright: Automatización multinavegador.
+Nightmare: Automatización basada en Electron (legado).
+Programación de tareas
+node-cron: Tareas programadas en Node.js.
+CLI y utilidades
+chalk: Colorea cadenas en terminal.
+commander: Analizador de argumentos CLI.
+inquirer: Prompts interactivos en CLI.
+dotenv: Carga variables de entorno.
+Almacenamiento
+fs: Sistema de archivos integrado.
+lowdb: Base de datos JSON local y ligera.
+sqlite3: Base de datos SQL local.
+mongodb: Base de datos NoSQL.
+Frameworks
+Crawlee: Framework avanzado para crawling y scraping.
+(Consulta siempre la documentación y repos oficiales para estar al día.)
+
+Recursos recomendados para dominar el Web Scraping en JavaScript
+¿Quieres ir más allá? Aquí tienes recursos para llevar tu scraping al siguiente nivel:
+
+Documentación oficial y guías
+MDN Web Docs: Web Scraping
+Documentación de Puppeteer
+Documentación de Playwright
+Documentación de Crawlee
+Apify Web Scraping Academy
+Tutoriales y cursos
+freeCodeCamp: Guía definitiva de Web Scraping con Node.js
+YouTube: Web Scraping con Node.js (freeCodeCamp)
+DigitalOcean: Cómo hacer scraping de un sitio web usando Node.js y Puppeteer
+Proyectos open-source y ejemplos
+GitHub: webscraping topic
+Apify Actor Store
+Comunidad y foros
+Stack Overflow: Web Scraping
+Reddit: r/webscraping
+Apify Community Discord
+Blog de Thunderbit
+Libros y guías completas
+“Web Scraping with Python” de O’Reilly (para conceptos generales)
+Udemy/Coursera: Cursos de “Web Scraping en Node.js”
+(Busca siempre las ediciones y actualizaciones más recientes.)
+
+Cómo extraer datos de cualquier web usando IA
+Conclusión: elige el enfoque que mejor encaje con tu equipo
+En resumen: JavaScript y Node.js te dan un poder y flexibilidad brutales para el web scraping. Puedes montar desde scripts rápidos hasta crawlers robustos y escalables. Pero ese poder también implica mucho mantenimiento. El scripting tradicional es perfecto para proyectos a medida, donde necesitas control total y puedes encargarte del mantenimiento.
+
+Para el resto—usuarios de negocio, analistas, marketers y cualquiera que solo quiere los datos—las soluciones modernas sin código como Thunderbit son un soplo de aire fresco. La extensión de Chrome con IA de Thunderbit te permite extraer, estructurar y exportar datos en minutos, sin programar, sin selectores y sin líos.
+
+¿La mejor opción? Si tu equipo es técnico y tiene necesidades muy concretas, lánzate a la caja de herramientas de Node.js. Si buscas rapidez, sencillez y centrarte en el análisis en vez de en la infraestructura, prueba Thunderbit. En cualquier caso, la web es tu base de datos: sal ahí fuera y consigue esos datos.
+
+Y si alguna vez te atascas, recuerda: hasta los mejores raspadores empezaron con una página en blanco y un buen café. ¡Feliz scraping!
+
+¿Quieres saber más sobre scraping con IA o ver Thunderbit en acción?
+
+Sitio oficial de Thunderbit
+Descarga la extensión de Chrome de Thunderbit
+Blog de Thunderbit
+Cómo extraer datos de cualquier web usando IA
+Qué es el Data Scraping y cómo hacerlo en 2025
+Si tienes dudas, anécdotas o historias de terror sobre scraping, déjalas en los comentarios o escríbeme. Me encanta saber cómo la gente convierte la web en su propio parque de datos.
+
+Sigue con la curiosidad, mantén el café a mano y haz scraping de forma más inteligente, no más difícil.
+
+Descargar extensión de Chrome de Thunderbit
+Prueba Raspador Web IA
+Preguntas frecuentes:
+1. ¿Por qué usar JavaScript y Node.js para web scraping en 2025?
+Porque la mayoría de webs modernas están hechas con JavaScript. Node.js es rápido, soporta asincronía y tiene un ecosistema brutal (Axios, Cheerio, Puppeteer) que cubre desde peticiones simples hasta scraping de contenido dinámico a gran escala.
+
+2. ¿Cuál es el flujo típico para extraer datos de una web con Node.js?
+Normalmente es así:
+
+Petición → Manejar respuesta → (Ejecución JS opcional) → Parsear HTML → Extraer datos → Guardar o exportar
+
+Cada paso puede hacerse con herramientas como axios, cheerio o puppeteer.
+
+3. ¿Cómo extraer datos de páginas dinámicas generadas por JavaScript?
+Utiliza navegadores sin interfaz como Puppeteer o Playwright. Cargan la página completa (incluido el JS), permitiendo extraer lo que ve el usuario.
+
+4. ¿Cuáles son los mayores retos del scraping tradicional?
+Cambios en la estructura de las webs
+Detección anti-bots
+Consumo de recursos del navegador
+Limpieza manual de datos
+Mantenimiento elevado a largo plazo
+Todo esto complica el scraping a gran escala o para usuarios no técnicos.
+
+5. ¿Cuándo conviene usar algo como Thunderbit en vez de programar?
+Usa Thunderbit si necesitas rapidez, sencillez y no quieres escribir ni mantener código. Es ideal para equipos de ventas, marketing o investigación que quieren extraer y estructurar datos rápido, especialmente de webs complejas o multipágina.
+
+Shuai Guan
+Shuai Guan
+Co-founder/CEO @ Thunderbit. Passionate about cross section of AI and Automation. He's a big advocate of automation and loves making it more accessible to everyone. Beyond tech, he channels his creativity through a passion for photography, capturing stories one picture at a time.
+Topics
+Web Scraping con JavaScript
+Web Scraping con Node.js
+Web scraping javascript
+Web scraping api
+
+Introduction
+JavaScript and Node.js are widely used for web scraping, but handling CAPTCHAs, dynamic content, and bot detection can make traditional methods like Axios, Cheerio, and Puppeteer difficult to scale.
+
+BrowserQL (aka BQL) simplifies this by automating JavaScript execution, CAPTCHA solving, and session management. In this guide, you’ll learn how to scrape efficiently with JavaScript, compare traditional approaches to BQL, and explore best practices for handling dynamic pages, rate limits, and large-scale scraping workflows.
+
+Javascript Web Scraping Fundamentals
+
+Understanding the Basics
+Web scraping with JavaScript and Node.js is built around a few core techniques. The most common methods include making direct HTTP requests, parsing the Document Object Model (DOM), and automating a browser to interact with web pages.
+
+HTTP Requests
+The simplest way to scrape a website is by sending an HTTP request to fetch the raw HTML. Libraries like axios or node-fetch make this easy:
+
+import axios from "axios";
+
+async function fetchPage() {
+  try {
+    const response = await axios.get("https://example.com");
+    console.log(response.data); // HTML content of the page
+  } catch (error) {
+    console.error("Error fetching page:", error);
+  }
+}
+
+fetchPage();
+Copy
+This type of method works well for static websites but won’t handle JavaScript-rendered content or more dynamic websites.
+
+DOM Parsing with Cheerio
+Now, once you have your HTML fetched, it's time to parse the HTML into useful data you can do this with tools like cheerio which allow you to extract specific elements:
+
+import axios from "axios";
+import * as cheerio from "cheerio";
+
+async function scrapeTitle() {
+  const response = await axios.get("https://example.com");
+  const $ = cheerio.load(response.data);
+
+  const title = $("title").text();
+  console.log("Page Title:", title);
+}
+
+scrapeTitle();
+Copy
+This is useful when working with structured HTML, but it won’t work for sites that generate content dynamically with JavaScript.
+
+Headless Browsers with Puppeteer
+When JavaScript is required to render content, tools like Puppeteer help by launching a browser and interacting with the page:
+
+import puppeteer from "puppeteer";
+
+async function scrapeWithBrowser() {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto("https://example.com", { waitUntil: "networkidle2" });
+
+  const content = await page.evaluate(() => document.body.innerHTML);
+  console.log(content);
+
+  await browser.close();
+}
+
+scrapeWithBrowser();
+Copy
+Here, the method handles JavaScript-heavy pages but comes with performance trade-offs, requiring more system resources and longer execution times.
+
+Challenges in Traditional Approaches
+Scraping isn’t as simple as loading a page and extracting data. Many modern sites rely on JavaScript to load content dynamically, making retrieving data with basic HTTP requests difficult.
+
+If a page fetches data from an API after loading, a traditional scraper might only see an empty template instead of the full content.
+
+Beyond that, bot detection systems are constantly improving; techniques like request fingerprinting, behavioral analysis, and CAPTCHA challenges can quickly block scrapers that don’t behave like real users.
+
+While headless browsers help overcome some of these barriers, managing them at scale adds complexity. Staying ahead of detection mechanisms requires proxy rotation, session management, and frequent updates.
+
+How BQL Makes Scrapy Easy
+Browser Query Language (BQL) simplifies the scraping workflow by automatically handling dynamic rendering, bot detection, and CAPTCHAs.
+
+Instead of juggling multiple tools to extract data, BQL acts as a centralized API that processes pages, executes JavaScript, and returns structured content without Puppeteer or Selenium.
+
+This means you don’t have to worry about managing headless browsers, bypassing anti-bot measures manually, or scaling complex infrastructure.
+
+BQL integrates easily with JavaScript-based workflows, allowing you to focus on extracting and processing data instead of troubleshooting and scraping roadblocks.
+
+Setting Up Your Environment for BQL Scraping
+
+Prerequisites
+Before getting started with BQL, you’ll need a few things set up:
+
+Install Node.js – This is required to run JavaScript outside the browser. You can download it from nodejs.org.
+Get a BrowserQL API Key – Sign up for a BrowserQL account and grab your API key from the dashboard.
+Install Dependencies
+BQL can handle much of the parsing automatically, reducing the need for additional libraries like cheerio. However, if you need more control, you can install common scraping libraries:
+npm install node-fetch cheerio
+
+Configuration
+1. Set Up a New Node.js Project
+If you don’t have a project already, create a new folder and initialize a Node.js project:
+
+mkdir bql-scraping
+cd bql-scraping
+npm init -y
+Copy
+2. Install Dependencies
+Install node-fetch to make HTTP requests (if needed):
+
+npm install node-fetch
+Copy
+3. Get Your API Key
+Log into your BrowserQL account, head to the API Keys section, and copy your key. You’ll need this to authenticate your queries.
+
+4. Configure the BrowserQL Editor
+Download and install the BrowserQL Editor from the BrowserQL dashboard. This editor provides an interactive way to write and test queries.
+
+Once installed:
+
+Open the Settings panel.
+Choose the API Endpoint closest to your location (e.g., https://production-sfo.browserless.io/ for San Francisco).
+Paste your API Token to authenticate requests.
+5. Writing Your First BQL Query
+BQL uses a GraphQL-based syntax, making queries easy to structure. Below is a basic example that loads a webpage and extracts the first headline.
+
+mutation ScrapeExample {
+  goto(url: "https://example.com", waitUntil: firstMeaningfulPaint) {
+    status
+    time
+  }
+  firstHeadline: text(selector: "h1") {
+    text
+  }
+}
+Copy
+Breaking It Down:
+goto: Loads the page and waits for meaningful content to render.
+status & time: Returns the HTTP status and load time.
+text(selector: "h1"): Extracts the text from the first 
+ on the page.
+6. Running Your Query
+You can test this query inside the BrowserQL Editor. If everything is set up correctly, you should get a JSON response like this:
+
+{
+  "data": {
+    "goto": {
+      "status": 200,
+      "time": 312
+    },
+    "firstHeadline": {
+      "text": "Welcome to Example"
+    }
+  }
+}
+Copy
+7. Exporting and Running Queries in Node.js
+Once you’ve tested your query, you can export it as a JavaScript function from the BrowserQL Editor. This lets you call the API directly from a Node.js script.
+
+import fetch from "node-fetch";
+
+const API_KEY = "YOUR_BQL_API_KEY";
+const BQL_ENDPOINT = "https://production-sfo.browserless.io/";
+
+async function scrapeWebsite() {
+  const query = `
+    mutation ScrapeExample {
+      goto(url: "https://example.com", waitUntil: firstMeaningfulPaint) {
+        status
+        time
+      }
+      firstHeadline: text(selector: "h1") {
+        text
+      }
+    }
+  `;
+
+  const response = await fetch(BQL_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  const data = await response.json();
+  console.log(data);
+}
+
+scrapeWebsite();
+Copy
+This script sends the BQL query to the API, extracts the page headline, and prints the result. Now that you’ve set up your environment and run your first query, we can explore more advanced features, such as handling JavaScript-rendered content, bypassing bot detection, and optimizing scraping workflows using BQL.
+
+Advanced Scraping Techniques Using BQL
+
+Dynamic Content Scraping
+Many websites use JavaScript to load content dynamically, making traditional scraping techniques ineffective. Instead of fetching raw HTML, scrapers often wait for JavaScript execution before extracting meaningful data. This is where BQL shines it renders pages like a real browser, eliminating the need for additional tools like Puppeteer or Selenium.
+
+With BQL, you don’t have to manage headless browsers on your infrastructure. The API handles everything server-side, meaning you can send a request, let BQL handle JavaScript execution, and receive fully rendered content. This reduces setup complexity and improves efficiency, especially when dealing with single-page applications (SPAs) or sites with client-side rendering.
+
+Bypassing CAPTCHAs and Bot Detection
+CAPTCHAs and bot detection mechanisms are some of the biggest obstacles in web scraping. BQL has built-in CAPTCHA-solving capabilities that automatically detect and interact with common CAPTCHA challenges, including those embedded in iframes or shadow DOMs.
+
+Beyond CAPTCHAs, BQL also helps bypass bot detection by handling browser fingerprinting techniques like TLS fingerprints, header consistency, and behavioral checks. Instead of manually configuring these settings in a headless browser, BQL does it in the background, making requests appear more human-like.
+
+In practice here’s how you could use BQL to solve a CAPTCHA on the product listing page before scraping dynamic content:
+
+mutation ScrapeProductPage {
+  # Step 1: Visit the product page and wait until the network is idle
+  goto(url: "https://example-shop.com/product/12345", waitUntil: networkIdle) {
+    status  # Returns HTTP status of the request (e.g., 200 for success)
+  }
+
+  # Step 2: Solve a Cloudflare challenge if detected
+  verify(type: cloudflare) {
+    found      # Indicates if Cloudflare's challenge was detected
+    solved     # Confirms whether the challenge was bypassed
+    time       # Time taken to solve the challenge
+  }
+
+  # Step 3: Solve any CAPTCHA (eg. reCAPTCHA) if present
+  solve(type: recaptcha) {
+    found      # Checks if a reCaptcha was found on the page
+    solved     # Confirms if it was successfully solved
+    time       # Time taken to bypass the CAPTCHA
+  }
+
+  # Step 4: Extract the product name from the page
+  productName: text(selector: ".product-title") {
+    text       # Retrieves text content of the product title
+  }
+
+  # Step 5: Extract the product price
+  productPrice: text(selector: ".price-container .current-price") {
+    text       # Retrieves text content of the product price
+  }
+
+  # Step 6: Extract the product availability status
+  productAvailability: text(selector: ".stock-status") {
+    text       # Retrieves availability information (e.g., "In Stock" or "Out of Stock")
+  }
+}
+Copy
+JavaScript Traditional Web Scraping vs BQL
+
+Comparing Tools and Techniques
+As we’ve discussed, JavaScript scraping uses tools such as Axios to make HTTP requests, Cheerio to parse HTML, and Puppeteer to interact with JavaScript-heavy pages.
+
+These libraries work well for simple use cases, but managing them can get frustrating as scraping gets more complex.
+
+Puppeteer, for example, requires running a full headless browser, which eats up memory and requires constant updates to stay ahead of detection systems. Handling CAPTCHAs, JavaScript rendering, and session persistence across multiple requests adds even more layers of difficulty.
+
+However, BQL eliminates most of these headaches by offering a fully managed scraping solution that handles browser automation, anti-bot challenges, and data extraction in a single API.
+
+Instead of manually setting up Puppeteer or dealing with rate limits, BQL automatically handles JavaScript execution, session persistence, CAPTCHA solving, and proxy management in the background.
+
+Traditional tools may be fine for scraping a simple API or static content, but BQL makes it far easier and more reliable to scrape large-scale or JavaScript-heavy content.
+
+Scalable JavaScript Scraping Workflows
+Scaling Web scraping in Node.js is challenging when juggling proxy rotation, session persistence, and request throttling to avoid detection.
+
+Traditional setups require additional tools, such as proxy managers and queue systems, to prevent blocking frequent requests. Handling this manually becomes a major bottleneck as your scraping needs grow.
+
+BQL simplifies scaling by automatically handling rate limits, dynamic content, and session persistence. Instead of writing scripts to rotate proxies or managing multiple headless browsers, BQL runs the browser for you and provides structured data through a GraphQL-like API.
+
+This means you can focus on extracting data instead of fixing bot detection issues. If you're dealing with high-traffic scraping jobs, integrating BQL into your Node.js projects streamlines the entire workflow while keeping requests efficient and undetectable.
+
+Conclusion
+Traditional JavaScript scraping tools work well for simple tasks, but handling dynamic content, CAPTCHAs, and bot detection requires more advanced solutions. BQL streamlines these challenges by automating JavaScript execution, managing sessions, and bypassing anti-bot mechanisms, making large-scale scraping more efficient. If you want to simplify workflows and improve scalability, explore BQL and integrate it into your Node.js scraping projects today.
+
+FAQs
+1. What are the main challenges of web scraping with JavaScript and Node.js?
+Scraping with JavaScript tools like Axios, Cheerio, and Puppeteer can be challenging due to JavaScript-rendered content, CAPTCHAs, bot detection, and rate limits. Managing proxies, sessions, and dynamic content can also become complex. BQL simplifies this by handling JavaScript execution, bypassing anti-bot measures, and returning structured data without extra setup.
+
+2. How does BQL compare to Puppeteer for JavaScript web scraping?
+Puppeteer runs a full headless browser, which mimics user interactions but requires significant resources. BQL offers a cloud-based alternative that automates JavaScript execution and bot detection without managing browsers or infrastructure, making it easier to scale.
+
+3. Can BQL scrape JavaScript-heavy pages and SPAs?
+Yes. Traditional scrapers may miss content loaded dynamically by JavaScript. BQL renders pages like a real browser, ensuring AJAX content, SPAs, and client-side data are fully processed before extraction, all without running a local headless browser.
+
+4. What’s the best way to scale JavaScript web scraping?
+Scaling requires managing rate limits, rotating IPs, and maintaining sessions. Traditional scrapers need proxy management and request throttling. BQL automates these tasks, making it easier to handle large-scale scraping while avoiding detection.
+
+Beautiful Soup : ¿cómo aprender a hacer web scraping en Python?
+1 Sep
+2:41 pm
+m de lecture
+Data Science
+
+Como usuario de Internet, uno tiene acceso a mucha información sobre clientes, ofertas, cotizaciones de acciones, fenómenos físicos, etc. Los usuarios pueden leer estos datos, pero nos gustaría poder explotarlos transformándolos en un formato operativo para finalmente analizarlos y aprovecharlos. El web scraping es la técnica que permite extraer esta información en un formato que pueda ser utilizado por los programas informáticos. En este artículo descubriremos cómo hacerlo con Beautiful Soup.
+
+Por ejemplo, es posible que se quiera tener acceso a todas las reseñas de un paquete de cartuchos de tinta negra HP en Amazon para poder hacer un análisis sintáctico, semántico y de sentimientos, y hacerse una opinión propia. El web scraping a partir de un localizador de tiendas (por ejemplo, un mapa) puede utilizarse para crear una lista de ubicaciones de negocios. También se pueden obtener las cotizaciones de las acciones para tomar mejores decisiones de inversión.
+
+En cuanto a la parte de análisis de datos, existen técnicas específicas para cada tipo de datos y cada objetivo. El siguiente diagrama muestra el proceso logístico que conduce a una decisión informada :
+
+Si estamos en la fase de recogida de datos, nos gustaría tener acceso a toda la información de una página web para poder realizar el estudio deseado.
+
+Para ello, tenemos la posibilidad de copiarla «a mano» en otro documento. Pero se trata de una tarea minuciosa, ya que puede llevar mucho tiempo, por no hablar de las erratas que pueden producirse durante la introducción de datos. Como se ha mencionado en la introducción, el web scraping permite acceder a esta información en un formato utilizable.
+
+Para la segunda fase, se recurre a los conocimientos técnicos de los Data Analysts, Data Engineers o Data Scientists para establecer los algoritmos y estudios estadísticos pertinentes.
+
+Por ejemplo, en el caso de analizar los comentarios sobre un producto, se puede utilizar un algoritmo de PNL, que permite a las máquinas entender el lenguaje humano.
+
+La interpretación de los datos suele hacerse en equipo, teniendo en cuenta la opinión de especialistas en la materia (por ejemplo, teniendo en cuenta la opinión del médico si se trabaja en un proyecto con datos médicos), para llegar finalmente a una toma de decisión óptima.
+
+En este artículo, nos centraremos en la fase 1, ya que nos interesa la recuperación de datos.
+
+En el siguiente párrafo, veremos una aplicación de la librería Beautiful Soup que permite hacer web scraping en Python.
+
+En el siguiente párrafo, veremos una biblioteca que permite hacer web scraping y que está disponible en Python y que constituye una herramienta excelente (y fácil de manejar) para extraer información de datos no estructurados : Beautiful Soup.
+
+Beautiful soup​
+La biblioteca Beautiful Soup permite extraer contenido y transformarlo en una lista, matriz o diccionario de Python.
+
+Esta biblioteca es muy popular porque tiene una documentación completa y sus funcionalidades están bien estructuradas. Además, existe una gran comunidad que ofrece soluciones variadas para utilizar esta biblioteca.
+
+¿Por qué se llama "Beautiful Soup"?
+Los sitios web están escritos en lenguajes informáticos HTML y CSS, que se utilizan para diseñar páginas web. HTML se utiliza para gestionar y organizar el contenido. La gestión de la apariencia de la página web (colores, tamaño del texto, etc.) se realiza mediante el lenguaje CSS.
+
+En el campo del desarrollo web, «tag soup» («sopa de etiquetas») es un término despectivo para hablar de la escritura sintáctica o estructuralmente incorrecta del HTML de una página web.
+
+Un ejemplo de web scraping con Beautiful soup
+Pongamos un ejemplo sencillo para familiarizarnos con estos conceptos.
+
+El siguiente ejemplo ha sido tomado de Kaggle y el objetivo es hacer un raspado o scraping de datos sobre la población del mundo. Los datos están disponibles en el sitio de Worldometer, un sitio de código abierto dirigido por un equipo internacional de desarrolladores e investigadores voluntarios, cuyo objetivo es poner las estadísticas globales a disposición de un amplio público en todo el mundo.
+
+Esta es una visión general de la página que vamos a raspar
+
+
+Nuestro objetivo es obtener esta tabla y convertirla en un DataFrame sin tener que copiar todos estos datos a mano.
+
+En un Jupyter Notebook primero importamos las bibliotecas necesarias.
+import csv
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+view rawgistfile1.txt hosted with ❤ by GitHub
+A continuación, creamos una variable URL en formato string (texto) que contiene el enlace a la página en cuestión.
+url = "https://www.worldometers.info/world-population/population-by-country/"
+view rawgistfile1.txt hosted with ❤ by GitHub
+Para preparar los datos, utilizamos la función requests.get() :
+req = requests.get(url)
+view rawgistfile1.txt hosted with ❤ by GitHub
+Ahora que los datos están preparados, se utiliza la función BeautifulSoup() para extraer el código HTML de esta página. En el argumento de esta función seleccionaremos el objeto .text.
+soup = BeautifulSoup(req.text)
+view rawgistfile1.txt hosted with ❤ by GitHub
+En los datos variables que almacenamos el código HTML buscamos la palabra clave «table» con la función .find_all():
+
+data = soup.find_all("table")[0]
+view rawgistfile1.txt hosted with ❤ by GitHub
+Utilizamos el comando .read_html(str()) para que la máquina lea el código HTML y luego recuperamos el primer y único elemento de este objeto (el array).
+
+df_population = pd.read_html(str(data))[0]
+view rawgistfile1.txt hosted with ❤ by GitHub
+À présent on affiche les premiers  éléments, commande .head() du DataFrame :
+
+df_population.head()
+view rawgistfile1.txt hosted with ❤ by GitHub
+ La base de datos también se puede exportar en formato csv con el siguiente comando :
+
+export_csv = df_population.to_csv(r"le chemin\nom du fichier.csv", index = None, header = True)
+view rawgistfile1.txt hosted with ❤ by GitHub
+Este comando crea un archivo en formato csv ubicado en la ruta indicada.
+
+Para facilitar la manipulación del DataFrame, podemos pensar en cambiar los nombres de las columnas o eliminar algunas de ellas si no las utilizamos.
+
+Ahora que hemos podido obtener los datos que se han puesto a disposición en el sitio de Worldometer y que están en formato DataFrame, podemos pasar a los demás pasos y hacer diferentes estudios. A continuación, podemos emprender el resto del proceso (Fases 2, 3 y 4, véase el diagrama de la introducción). En función de la naturaleza de los datos y de los objetivos que se pretenden alcanzar, se pueden realizar diferentes estudios: análisis exploratorio, propuesta de un modelo de Machine Learning, modelización de series temporales, etc.
+
+Acabamos de ver un ejemplo que nos permite recuperar datos almacenados en una tabla, pero es importante recordar que dependiendo de la estructura de la página web en la que queramos raspar los datos, utilizaremos diferentes bibliotecas y funciones. La buena noticia es que hay muchos ejemplos disponibles en Internet en función del formato de la página y de la configuración de los datos que se quieren raspar.
+
+Para resumir, el web scraping permite navegar por Internet de forma «inteligente» y, por tanto, es un recurso muy rico para cualquier área de investigación o interés personal.
+
+El curso de Data Analyst de Datascientest te permite aprender y practicar las habilidades de web scraping y mucho más. Si quieres aprender sobre análisis de datos y adquirir conocimientos técnicos relacionados con este tema, no dudes en apuntarte al curso de Data Analyst
+Python Web Scraping Tutorial
+Last Updated : 23 Jul, 2025
+Web scraping is the process of extracting data from websites automatically. Python is widely used for web scraping because of its easy syntax and powerful libraries like BeautifulSoup, Scrapy, and Selenium.
+
+In this tutorial, you'll learn how to use these Python tools to scrape data from websites and understand why Python 3 is a popular choice for web scraping tasks.
+
+Popular-Python-Libraries-for-Web-Scraping.webpPopular-Python-Libraries-for-Web-Scraping.webp
+Installing Required Libraries
+To install the required libraries in this article, run the following commands in the terminal.
+
+pip install requests
+
+pip install beautifulsoup4
+
+pip install selenium
+
+pip install lxml
+
+pip install schedule
+
+pip install pyautogui
+
+requests: Sends HTTP requests to get webpage content (used for static sites).
+beautifulsoup4: Parses and extracts HTML content (like tags, text, links).
+selenium: Automates browsers (needed for dynamic sites with JavaScript).
+lxml: A fast HTML/XML parser, useful for large or complex pages.
+schedule: Lets you run scraping tasks repeatedly at fixed intervals.
+pyautogui: Automates mouse and keyboard; useful when dealing with UI-based interactions.
+Requests Module
+The requests library is used for making HTTP requests to a specific URL and returns the response. Python requests provide inbuilt functionalities for managing both the request and response.
+
+pip install requests
+
+Example: Send a GET request to a webpage
+
+import requests
+
+response = requests.get('https://www.geeksforgeeks.org/python/python-programming-language-tutorial/')
+
+print(response.status_code)
+
+print(response.content)
+Output:
+
+web-scraping-1
+Snapshot of the raw html data using request module
+Explanation:
+
+requests.get(url): Sends a GET request to the given URL.
+response.status_code: Returns HTTP status code (200 = success).
+response.content: Returns the raw HTML of the page in bytes.
+For more information, refer to our  Python Requests Tutorial  . 
+
+Parsing HTML with BeautifulSoup
+Once the raw HTML is fetched, the next step is to parse it into a readable structure. That’s where BeautifulSoup comes in. It helps convert the raw HTML into a searchable tree of elements.
+
+Example: Parse HTML using BeautifulSoup
+
+import requests
+from bs4 import BeautifulSoup
+
+response = requests.get('https://www.geeksforgeeks.org/python/python-programming-language-tutorial/')
+
+soup = BeautifulSoup(response.content, 'html.parser')
+
+print(soup.prettify())
+Output:
+
+web-scraping-2
+Snapshot of the beautified html response using beautifulsoap module
+Explanation:
+
+BeautifulSoup(html, parser): Converts HTML into a searchable object. 'html.parser' is the built-in parser.
+soup.prettify(): Formats the HTML nicely for easier reading.
+At this point, the HTML is ready to be searched for tags, classes or content.
+
+Extracting Content by Tag and Class
+Once we have parsed the HTML using BeautifulSoup, the next step is to locate and extract specific content from the page. Websites usually wrap their main article content inside tags with identifiable classes like <div class="article--viewer_content">. We can target such elements and pull out useful data like text, links or images.
+
+In this example, we'll extract all paragraph (<p>) text from the main content section of the GeeksforGeeks Python Tutorial page.
+
+Example: Extract paragraph content by class and tag
+
+import requests
+from bs4 import BeautifulSoup
+
+# Fetch and parse the page
+response = requests.get('https://www.geeksforgeeks.org/python/python-programming-language-tutorial/')
+soup = BeautifulSoup(response.content, 'html.parser')
+
+# Find the main content container
+content_div = soup.find('div', class_='article--viewer_content')
+if content_div:
+    for para in content_div.find_all('p'):
+        print(para.text.strip())
+else:
+    print("No article content found.")
+Output:
+
+web-scraping-3
+Extracted text content from the given URL
+Image of the actual GeeksforGeeks Python Tutorial page:
+
+web-scraping-4
+Snapshot of the actual webpage of the URL
+Notice that the text output in the terminal contains the actual content from the web page.
+
+ For more information, refer to our  Python BeautifulSoup  . 
+
+Selenium
+Some websites load their content dynamically using JavaScript. This means the data you're trying to scrape may not be present in the initial HTML source. In such cases, BeautifulSoup alone won’t work, because it only reads static HTML.
+
+To handle this, we use Selenium that can automate browsers like Chrome or Firefox, wait for content to load, click buttons, scroll and extract fully rendered web pages just like a real user.
+
+What is a WebDriver
+A WebDriver is a software component that Selenium uses to interact with a web browser. It acts as the bridge between your Python script and the actual browser window.
+
+Each browser (Chrome, Firefox, Edge, etc.) has its own WebDriver:
+
+Chrome: ChromeDriver
+Firefox: GeckoDriver
+Edge: EdgeDriver
+Selenium uses this WebDriver to:
+
+Open and control the browser
+Load web pages
+Extract elements
+Simulate clicks, scrolls and inputs
+You can either manually download the WebDriver or use webdriver-manager which handles the download and setup automatically.
+
+Example 1: Searching on Google with Firefox
+In this example, we're directing the browser to the Google search page with the query parameter "geeksforgeeks". The browser will load this page and we can then proceed to interact with it programmatically using Selenium. This interaction could involve tasks like extracting search results, clicking on links or scraping specific content from the page.
+
+
+# import webdriver 
+from selenium import webdriver 
+
+# create webdriver object 
+driver = webdriver.Firefox() 
+
+# get google.co.in 
+driver.get("https://www.google.co.in/ / search?q = geeksforgeeks") 
+Output
+
+for-firefox
+
+Example 2: Scrape Laptop Details from a Test Site using Chrome
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+
+element_list = []
+
+# Set up Chrome options (optional)
+options = webdriver.ChromeOptions()
+options.add_argument("--headless")  # Run in headless mode (optional)
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+# Use a proper Service object
+service = Service(ChromeDriverManager().install())
+
+for page in range(1, 3):
+    # Initialize driver properly
+    driver = webdriver.Chrome(service=service, options=options)
+
+    # Load the URL
+    url = f"https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=%7Bpage%7D"
+    driver.get(url)
+    time.sleep(2)  # Optional wait to ensure page loads
+
+    # Extract product details
+    titles = driver.find_elements(By.CLASS_NAME, "title")
+    prices = driver.find_elements(By.CLASS_NAME, "price")
+    descriptions = driver.find_elements(By.CLASS_NAME, "description")
+    ratings = driver.find_elements(By.CLASS_NAME, "ratings")
+
+    # Store results in a list
+    for i in range(len(titles)):
+        element_list.append([
+            titles[i].text,
+            prices[i].text,
+            descriptions[i].text,
+            ratings[i].text
+        ])
+
+    driver.quit()
+
+# Display extracted data
+for row in element_list:
+    print(row)
+Output:
+
+web-scraping-5
+Snapshot of the output in Terminal
+Explanation:
+
+ChromeOptions() + --headless: Runs the browser in the background without opening a visible window — ideal for automation and speed.
+ChromeDriverManager().install(): Automatically downloads the correct version of ChromeDriver based on your Chrome browser.
+Service(...): Wraps the ChromeDriver path for proper configuration with Selenium 4+.
+webdriver.Chrome(service=..., options=...): Launches a Chrome browser instance with the given setup.
+driver.get(url): Navigates to the specified page URL.
+find_elements(By.CLASS_NAME, "class"): Extracts all elements matching the given class name like titles, prices, etc.
+.text: Retrieves the visible text content from an HTML element.
+element_list.append([...]): Stores each product's extracted data in a structured list.
+driver.quit(): Closes the browser to free system resources.
+ For more information, refer to our  Python Selenium  . 
+
+Parsing HTML with lxml and XPath
+lxml is a high-speed parser that supports XPath queries, ideal when you need precision.
+
+Example
+Below is a simple example demonstrating how to use the lxml module for Python web scraping:
+
+We import the html module from lxml along with the requests module for sending HTTP requests.
+We define the URL of the website we want to scrape.
+We send an HTTP GET request to the website using the requests.get() function and retrieve the HTML content of the page.
+We parse the HTML content using the html.fromstring() function from lxml which returns an HTML element tree.
+We use XPath expressions to extract specific elements from the HTML tree. In this case, we're extracting the text content of all the <a> (anchor) elements on the page.
+We iterate over the extracted link titles and print them out.
+
+
+
+from lxml import html
+import requests
+​
+url = 'https://example.com/'
+response = requests.get(url)
+tree = html.fromstring(response.content)
+​
+# Extract all link texts
+link_titles = tree.xpath('//a/text()')
+​
+for title in link_titles:
+    print(title)
+Output in the Terminal
+
+More information...
+
+Below is the snapshot of the actual webpage of the URL: 'https://example.com/'
+
+web-scraping-6
+Snapshot of the webpage of URL used in the code
+Code Explanation:
+
+html.fromstring(): Parses HTML into an element tree.
+tree.xpath(): Uses XPath to extract specific tags or data.
+For more information, refer to our lxml
+
+Urllib Module
+The urllib module in Python is a built-in library that provides functions for working with URLs. It allows you to interact with web pages by fetching URLs (Uniform Resource Locators), opening and reading data from them and performing other URL-related tasks like encoding and parsing. Urllib is a package that collects several modules for working with URLs such as:
+
+urllib.request for opening and reading.
+urllib.parse for parsing URLs
+urllib.error for the exceptions raised
+urllib.robotparser for parsing robot.txt files
+If urllib is not present in your environment, execute the below code to install it.
+
+pip install urllib3
+
+Example
+Here's a simple example demonstrating how to use the urllib module to fetch the content of a web page:
+
+We define the URL of the web page we want to fetch.
+We use urllib.request.urlopen() function to open the URL and obtain a response object.
+We read the content of the response object using the read() method.
+Since the content is returned as bytes, we decode it to a string using the decode() method with 'utf-8' encoding.
+Finally, we print the HTML content of the web page.
+
+
+
+import urllib.request
+​
+# URL of the web page to fetch
+url = 'https://www.example.com/'
+​
+try:
+    response = urllib.request.urlopen(url)
+    data = response.read()
+    
+    # Decode the data (if it's in bytes) to a string
+    html_content = data.decode('utf-8')
+    
+    # Print the HTML content of the web page
+    print(html_content)
+​
+except Exception as e:
+    print("Error fetching URL:", e)
+Output:
+
+uutt
+
+For more information, refer to urllib module
+
+Automating UI Tasks with PyAutoGUI
+PyAutoGUI lets you simulate mouse and keyboard actions. It’s useful if elements aren’t reachable via Selenium like special pop-ups or custom scrollbars.
+
+Example:
+In this example, pyautogui is used to perform scrolling and take a screenshot of the search results page obtained by typing a query into the search input field and clicking the search button using Selenium.
+
+
+
+
+import pyautogui
+​
+# moves to (519,1060) in 1 sec
+pyautogui.moveTo(519, 1060, duration = 1)
+​
+# simulates a click at the present mouse position 
+pyautogui.click()
+​
+pyautogui.moveTo(1717, 352, duration = 1) 
+​
+pyautogui.click()
+Output
+
+
+
+Explanation:
+
+moveTo(x, y): Moves the mouse to a screen position.
+click(): Clicks at the current mouse location.
+For more information, refer to PyAutoGUI
+
+Scheduling Scraping Jobs with schedule
+The schedule module in Python is a simple library that allows you to schedule Python functions to run at specified intervals. It's particularly useful in web scraping in Python when you need to regularly scrape data from a website at predefined intervals such as hourly, daily or weekly.
+
+Example: How to Schedule a Function call Every Minute
+
+import schedule 
+import time 
+
+def func(): 
+    print("Geeksforgeeks") 
+
+schedule.every(1).minutes.do(func) 
+
+while True: 
+    schedule.run_pending() 
+    time.sleep(1) 
+Output:
+
+web-scraping-7
+Snapshot of the terminal output after 4 minutes of running the program
+Explanation:
+
+You can notice in the output that the pragram is call the function "func" every minute, so you can implement the code for timely web scrapping in similar way.
+
+schedule.every().minutes.do(): Schedules your function.
+run_pending(): Checks if any job is due.
+time.sleep(): Prevents the loop from hogging CPU.
+Why Python 3 for Web Scraping
+Python 3 is the most modern and supported version of Python and it's ideal for web scraping because:
+
+Readable syntax: Easy to learn and write.
+Strong library support: Tools like BeautifulSoup and Selenium are built for it.
+Active community: Tons of support and examples online.
+Flexible: Can combine with data analysis, ML or APIs.
