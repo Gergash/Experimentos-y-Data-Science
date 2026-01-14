@@ -1,0 +1,468 @@
+{
+    "name": "Calendar Assistant - Gemini + Google Calendar",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "calendar-assistant",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [250, 300],
+        "webhookId": "calendar-assistant-webhook"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "x-goog-api-key",
+                "value": "={{ $env.GEMINI_API_KEY }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Eres un asistente de calendario experto en español. Analiza el siguiente mensaje y extrae la información estructurada para gestionar Google Calendar.\\n\\nMensaje del usuario: \\\"{{ $json.message }}\\\"\\n\\nFecha actual: {{ $now.format('YYYY-MM-DD') }}\\nDía de la semana: {{ $now.format('dddd') }}\\n\\nResponde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin explicaciones adicionales) con esta estructura exacta:\\n\\n{\\n  \\\"accion\\\": \\\"crear\\\" | \\\"modificar\\\" | \\\"eliminar\\\" | \\\"consultar\\\",\\n  \\\"tipo_evento\\\": \\\"reunion\\\" | \\\"sesion_trabajo\\\" | \\\"pendiente\\\" | \\\"estudio\\\" | \\\"recordatorio\\\",\\n  \\\"titulo\\\": \\\"título descriptivo del evento\\\",\\n  \\\"fecha\\\": \\\"YYYY-MM-DD\\\",\\n  \\\"hora_inicio\\\": \\\"HH:MM\\\",\\n  \\\"hora_fin\\\": \\\"HH:MM\\\",\\n  \\\"duracion_minutos\\\": 60,\\n  \\\"ubicacion\\\": \\\"ubicación física o virtual\\\",\\n  \\\"contacto\\\": \\\"nombre del contacto principal\\\",\\n  \\\"proyecto\\\": \\\"nombre del proyecto o empresa\\\",\\n  \\\"descripcion\\\": \\\"notas adicionales relevantes\\\",\\n  \\\"alarmas\\\": [15, 60],\\n  \\\"color\\\": \\\"4\\\",\\n  \\\"invitados\\\": [\\\"email@example.com\\\"],\\n  \\\"evento_existente_id\\\": null,\\n  \\\"criterios_busqueda\\\": \\\"criterios detallados para encontrar evento a modificar/eliminar\\\"\\n}\\n\\nReglas críticas:\\n1. FECHAS RELATIVAS: Convierte a fecha absoluta YYYY-MM-DD\\n   - \\\"mañana\\\" = {{ $now.plus(1, 'days').format('YYYY-MM-DD') }}\\n   - \\\"hoy\\\" = {{ $now.format('YYYY-MM-DD') }}\\n   - \\\"lunes\\\" = calcular próximo lunes desde hoy\\n   - \\\"próximo viernes\\\" = calcular siguiente viernes\\n2. HORAS: Formato 24h (HH:MM). Si dice \\\"3pm\\\" = \\\"15:00\\\"\\n3. DURACIÓN: Si no especifica hora_fin, estima según tipo:\\n   - reunión: 60 min\\n   - sesion_trabajo: 120 min\\n   - estudio: 90 min\\n   - recordatorio: 15 min\\n4. COLORES (ID numérico como string):\\n   - \\\"1\\\"=Lavanda, \\\"2\\\"=Salvia, \\\"3\\\"=Uva, \\\"4\\\"=Flamingo\\n   - \\\"5\\\"=Plátano, \\\"6\\\"=Tangerina, \\\"7\\\"=Pavo real\\n   - \\\"8\\\"=Grafito, \\\"9\\\"=Arándano, \\\"10\\\"=Albahaca, \\\"11\\\"=Tomate\\n   - Asignar: reuniones=\\\"4\\\", trabajo=\\\"7\\\", estudio=\\\"9\\\", pendientes=\\\"11\\\"\\n5. MODIFICAR/ELIMINAR: Incluir criterios_busqueda detallados con título parcial, fecha aproximada, contacto\\n6. INVITADOS: Array de emails válidos o array vacío\\n7. ALARMAS: Array de números (minutos antes). Default: [15, 60]\\n8. Todos los campos string entre comillas, números sin comillas\\n9. null para campos opcionales vacíos\"\n    }]\n  }],\n  \"generationConfig\": {\n    \"temperature\": 0.1,\n    \"topK\": 1,\n    \"topP\": 0.95,\n    \"maxOutputTokens\": 2048,\n    \"responseMimeType\": \"application/json\"\n  }\n}",
+          "options": {}
+        },
+        "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "name": "Gemini API",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [450, 300]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Obtener respuesta de Gemini\nconst geminiResponse = $input.item.json.candidates[0].content.parts[0].text;\n\n// Limpiar posible markdown residual\nlet cleanedJSON = geminiResponse\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\n// Parsear a objeto\nlet eventData;\ntry {\n  eventData = JSON.parse(cleanedJSON);\n} catch (error) {\n  throw new Error(`Error parseando respuesta de Gemini: ${error.message}. Respuesta: ${cleanedJSON}`);\n}\n\n// Validaciones críticas\nif (!eventData.accion) {\n  throw new Error('Falta campo requerido: accion');\n}\nif (!eventData.titulo && eventData.accion !== 'eliminar') {\n  throw new Error('Falta campo requerido: titulo');\n}\n\n// Procesar fecha - asegurar formato YYYY-MM-DD\nconst now = new Date();\nlet fechaEvento = eventData.fecha;\n\nif (!fechaEvento || fechaEvento === '' || fechaEvento === 'null') {\n  fechaEvento = now.toISOString().split('T')[0];\n}\n\n// Validar formato de fecha\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(fechaEvento)) {\n  throw new Error(`Formato de fecha inválido: ${fechaEvento}. Debe ser YYYY-MM-DD`);\n}\n\n// Procesar horas - asegurar formato HH:MM\nlet horaInicio = eventData.hora_inicio || '09:00';\nlet horaFin = eventData.hora_fin;\n\n// Si no hay hora_fin, calcular según duración\nif (!horaFin || horaFin === '' || horaFin === 'null') {\n  const duracion = eventData.duracion_minutos || 60;\n  const [horas, minutos] = horaInicio.split(':').map(Number);\n  const inicioDate = new Date(2000, 0, 1, horas, minutos);\n  const finDate = new Date(inicioDate.getTime() + duracion * 60000);\n  horaFin = `${String(finDate.getHours()).padStart(2, '0')}:${String(finDate.getMinutes()).padStart(2, '0')}`;\n}\n\n// Formatear para Google Calendar API\neventData.start = {\n  dateTime: `${fechaEvento}T${horaInicio}:00`,\n  timeZone: 'America/Bogota'\n};\n\neventData.end = {\n  dateTime: `${fechaEvento}T${horaFin}:00`,\n  timeZone: 'America/Bogota'\n};\n\n// Configurar recordatorios/alarmas\nconst alarmasArray = Array.isArray(eventData.alarmas) ? eventData.alarmas : [15, 60];\neventData.reminders = {\n  useDefault: false,\n  overrides: alarmasArray.map(minutos => ({\n    method: 'popup',\n    minutes: Number(minutos)\n  }))\n};\n\n// Preparar descripción completa\nlet descripcionCompleta = eventData.descripcion || '';\nif (eventData.proyecto) {\n  descripcionCompleta += `\\n\\n📁 Proyecto: ${eventData.proyecto}`;\n}\nif (eventData.contacto) {\n  descripcionCompleta += `\\n👤 Contacto: ${eventData.contacto}`;\n}\neventData.descripcion_completa = descripcionCompleta.trim();\n\n// Preparar invitados en formato Google Calendar\nif (eventData.invitados && Array.isArray(eventData.invitados) && eventData.invitados.length > 0) {\n  eventData.attendees = eventData.invitados\n    .filter(email => email && email.includes('@'))\n    .map(email => ({ email: email.trim() }));\n} else {\n  eventData.attendees = [];\n}\n\n// Asegurar que color sea string\nif (eventData.color) {\n  eventData.color = String(eventData.color);\n}\n\n// Guardar datos originales del usuario para respuesta\neventData.mensaje_original = $('Webhook').item.json.message;\neventData.user_id = $('Webhook').item.json.user_id || 'unknown';\n\nreturn { json: eventData };"
+        },
+        "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+        "name": "Parsear y Preparar",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [650, 300]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "condition1",
+                "leftValue": "={{ $json.accion }}",
+                "rightValue": "crear",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "d4e5f6a7-b8c9-0123-def0-234567890123",
+        "name": "Es Crear?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [850, 200]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "condition2",
+                "leftValue": "={{ $json.accion }}",
+                "rightValue": "modificar",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "e5f6a7b8-c9d0-1234-ef01-345678901234",
+        "name": "Es Modificar?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [850, 350]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "condition3",
+                "leftValue": "={{ $json.accion }}",
+                "rightValue": "eliminar",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "f6a7b8c9-d0e1-2345-f012-456789012345",
+        "name": "Es Eliminar?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [850, 500]
+      },
+      {
+        "parameters": {
+          "calendar": {
+            "__rl": true,
+            "value": "primary",
+            "mode": "list",
+            "cachedResultName": "Primary"
+          },
+          "start": "={{ $json.start.dateTime }}",
+          "end": "={{ $json.end.dateTime }}",
+          "title": "={{ $json.titulo }}",
+          "additionalFields": {
+            "description": "={{ $json.descripcion_completa }}",
+            "location": "={{ $json.ubicacion || '' }}",
+            "color": "={{ $json.color || '4' }}",
+            "attendees": "={{ $json.attendees }}",
+            "sendUpdates": "all",
+            "reminders": "={{ $json.reminders }}"
+          }
+        },
+        "id": "a7b8c9d0-e1f2-3456-0123-567890123456",
+        "name": "Google Calendar Crear",
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 2,
+        "position": [1050, 200],
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "TU_CREDENTIAL_ID_AQUI",
+            "name": "Google Calendar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "getAll",
+          "calendar": {
+            "__rl": true,
+            "value": "primary",
+            "mode": "list",
+            "cachedResultName": "Primary"
+          },
+          "returnAll": false,
+          "limit": 5,
+          "options": {
+            "query": "={{ $json.criterios_busqueda || $json.titulo }}",
+            "timeMax": "={{ $now.plus(30, 'days').toISO() }}",
+            "timeMin": "={{ $now.minus(7, 'days').toISO() }}"
+          }
+        },
+        "id": "b8c9d0e1-f2a3-4567-1234-678901234567",
+        "name": "Buscar Evento Modificar",
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 2,
+        "position": [1050, 350],
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "TU_CREDENTIAL_ID_AQUI",
+            "name": "Google Calendar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "getAll",
+          "calendar": {
+            "__rl": true,
+            "value": "primary",
+            "mode": "list",
+            "cachedResultName": "Primary"
+          },
+          "returnAll": false,
+          "limit": 5,
+          "options": {
+            "query": "={{ $json.criterios_busqueda || $json.titulo }}",
+            "timeMax": "={{ $now.plus(30, 'days').toISO() }}",
+            "timeMin": "={{ $now.minus(7, 'days').toISO() }}"
+          }
+        },
+        "id": "c9d0e1f2-a3b4-5678-2345-789012345678",
+        "name": "Buscar Evento Eliminar",
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 2,
+        "position": [1050, 500],
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "TU_CREDENTIAL_ID_AQUI",
+            "name": "Google Calendar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "calendar": {
+            "__rl": true,
+            "value": "primary",
+            "mode": "list",
+            "cachedResultName": "Primary"
+          },
+          "eventId": "={{ $json.id }}",
+          "useUpdateFields": true,
+          "updateFields": {
+            "start": "={{ $('Parsear y Preparar').item.json.start.dateTime }}",
+            "end": "={{ $('Parsear y Preparar').item.json.end.dateTime }}",
+            "title": "={{ $('Parsear y Preparar').item.json.titulo }}",
+            "description": "={{ $('Parsear y Preparar').item.json.descripcion_completa }}",
+            "location": "={{ $('Parsear y Preparar').item.json.ubicacion }}",
+            "sendUpdates": "all"
+          }
+        },
+        "id": "d0e1f2a3-b4c5-6789-3456-890123456789",
+        "name": "Google Calendar Actualizar",
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 2,
+        "position": [1250, 350],
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "TU_CREDENTIAL_ID_AQUI",
+            "name": "Google Calendar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "delete",
+          "calendar": {
+            "__rl": true,
+            "value": "primary",
+            "mode": "list",
+            "cachedResultName": "Primary"
+          },
+          "eventId": "={{ $json.id }}",
+          "options": {
+            "sendUpdates": "all"
+          }
+        },
+        "id": "e1f2a3b4-c5d6-7890-4567-901234567890",
+        "name": "Google Calendar Eliminar",
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 2,
+        "position": [1250, 500],
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "TU_CREDENTIAL_ID_AQUI",
+            "name": "Google Calendar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"success\": true,\n  \"accion\": \"{{ $json.accion || 'crear' }}\",\n  \"mensaje\": \"✅ Evento {{ $json.accion === 'crear' ? 'creado' : $json.accion === 'modificar' ? 'modificado' : 'eliminado' }} exitosamente\",\n  \"detalles\": {\n    \"titulo\": \"{{ $json.summary || $json.titulo }}\",\n    \"fecha\": \"{{ $json.start?.dateTime?.split('T')[0] || $('Parsear y Preparar').item.json.fecha }}\",\n    \"hora_inicio\": \"{{ $json.start?.dateTime?.split('T')[1]?.substring(0,5) || $('Parsear y Preparar').item.json.hora_inicio }}\",\n    \"hora_fin\": \"{{ $json.end?.dateTime?.split('T')[1]?.substring(0,5) || $('Parsear y Preparar').item.json.hora_fin }}\",\n    \"ubicacion\": \"{{ $json.location || $('Parsear y Preparar').item.json.ubicacion || 'No especificada' }}\",\n    \"proyecto\": \"{{ $('Parsear y Preparar').item.json.proyecto || 'N/A' }}\",\n    \"contacto\": \"{{ $('Parsear y Preparar').item.json.contacto || 'N/A' }}\",\n    \"event_id\": \"{{ $json.id || 'N/A' }}\",\n    \"calendar_link\": \"{{ $json.htmlLink || 'N/A' }}\"\n  },\n  \"mensaje_procesado\": \"{{ $('Parsear y Preparar').item.json.mensaje_original }}\"\n}",
+          "options": {}
+        },
+        "id": "f2a3b4c5-d6e7-8901-5678-012345678901",
+        "name": "Respuesta Exitosa",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [1450, 300]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.error?.message || $json.message || 'Error desconocido' }}\",\n  \"mensaje\": \"❌ No pude procesar tu solicitud. Por favor, intenta de nuevo con más detalles.\",\n  \"sugerencias\": [\n    \"Ejemplo: 'Mañana a las 3pm reunión con Juan sobre proyecto Alpha'\",\n    \"Incluye: fecha, hora, con quién, sobre qué\",\n    \"Para modificar: 'Cambia la reunión del viernes con María al lunes a las 10am'\",\n    \"Para eliminar: 'Cancela la reunión del miércoles con Pedro'\"\n  ],\n  \"mensaje_original\": \"{{ $('Webhook').item.json.message || 'N/A' }}\",\n  \"timestamp\": \"{{ $now.toISO() }}\"\n}",
+          "options": {
+            "responseCode": 400
+          }
+        },
+        "id": "a3b4c5d6-e7f8-9012-6789-123456789012",
+        "name": "Respuesta Error",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [1450, 600]
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Gemini API",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gemini API": {
+        "main": [
+          [
+            {
+              "node": "Parsear y Preparar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parsear y Preparar": {
+        "main": [
+          [
+            {
+              "node": "Es Crear?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Es Modificar?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Es Eliminar?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Es Crear?": {
+        "main": [
+          [
+            {
+              "node": "Google Calendar Crear",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Es Modificar?": {
+        "main": [
+          [
+            {
+              "node": "Buscar Evento Modificar",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Es Eliminar?": {
+        "main": [
+          [
+            {
+              "node": "Buscar Evento Eliminar",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Google Calendar Crear": {
+        "main": [
+          [
+            {
+              "node": "Respuesta Exitosa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Evento Modificar": {
+        "main": [
+          [
+            {
+              "node": "Google Calendar Actualizar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Evento Eliminar": {
+        "main": [
+          [
+            {
+              "node": "Google Calendar Eliminar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Calendar Actualizar": {
+        "main": [
+          [
+            {
+              "node": "Respuesta Exitosa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Calendar Eliminar": {
+        "main": [
+          [
+            {
+              "node": "Respuesta Exitosa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "settings": {
+      "executionOrder": "v1",
+      "saveManualExecutions": true,
+      "callerPolicy": "workflowsFromSameOwner",
+      "errorWorkflow": ""
+    },
+    "staticData": null,
+    "tags": [],
+    "triggerCount": 1,
+    "updatedAt": "2026-01-10T00:00:00.000Z",
+    "versionId": "1.0.0"
+  }
