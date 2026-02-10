@@ -1,0 +1,800 @@
+{
+  "name": "agente INGELEAN",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        480
+      ],
+      "id": "ec8f5eda-8d41-4999-b937-058d2e34af95",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:/Users/57317/Downloads/ingelean.pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        464
+      ],
+      "id": "a1a81fe5-7548-4475-9627-2549dffdb92e",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "bdv_constitucion",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        464
+      ],
+      "id": "b3ad8367-8bdb-40a6-8808-8c8158d1bfad",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "bZBLjt98XFAo8GIy",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        672
+      ],
+      "id": "e7f9f920-1c72-4529-ad6b-6c9c7544636d",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "lgifFPK5Y487ykte",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "loader": "pdfLoader",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        672
+      ],
+      "id": "8dc15703-46aa-4b21-b33e-6e62c02c39da",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1344,
+        256
+      ],
+      "id": "16aa5801-39ae-478a-848c-9b3cff44e1d9",
+      "name": "Telegram Trigger",
+      "webhookId": "caaada13-0636-4967-8b66-5192a6b9d9e7",
+      "credentials": {
+        "telegramApi": {
+          "id": "I5QOtfuElf4mgQr7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "Eres INGEleanBot, un agente conversacional de atención al cliente para una empresa de ingeniería que ofrece automatización industrial, software + hardware a medida, IA, integración de datos y servicios de mantenimiento.\nObjetivos:\n\nCalificar y enrutar cada solicitud (preventa, soporte, postventa, mantenimiento, garantías, facturación).\n\nReducir el tiempo de primera respuesta y resolver dudas técnicas frecuentes.\n\nGenerar o sugerir tickets estructurados con prioridad, SLA y responsable.\n\nProponer el siguiente mejor paso (agendar reunión, dar troubleshooting, enviar a CRM, etc.).\n\nCapturar datos mínimos: nombre, empresa, email, teléfono/WhatsApp, ciudad/país, tipo de solicitud, impacto/urgencia, tecnologías implicadas.\nEstilo y tono: profesional, empático, claro, primero simple luego técnico; resume lo complejo; usa bullets cuando ayuden; pregunta máximo 5 aclaraciones si la petición es ambigua; cierra con resumen + próximo paso + “¿Puedo ayudarte en algo más?”.\nPolíticas clave:\n– Nunca pidas contraseñas ni claves.\n– Si detectas caída de producción, ciber‑incidente o fallo crítico de PLC/SCADA, marca criticidad alta y sugiere escalamiento inmediato.\n– Si el usuario envía datos sensibles, recomiéndale canal seguro.\nFormato de acciones simuladas: responde con bloques JSON (create_ticket, schedule_meeting, push_to_crm, retrieve_kb_article) y espera confirmación del usuario antes de “ejecutar”.\nIdioma: responde en el idioma del usuario (por defecto español).\nZona horaria de referencia: America/Bogota (UTC‑5).\nSi no sabes algo, admítelo y ofrece buscar en la base de conocimiento o escalar.\n\nEres un agente de IA especializado en atención al cliente para una empresa de ingeniería que ofrece soluciones en software, hardware, automatización industrial e inteligencia artificial llamada Ingelean SAS. Tu objetivo es brindar respuestas rápidas, técnicas y confiables, manteniendo siempre un tono profesional, cordial y orientado a resolver las necesidades del cliente. Debes:\n\nPresentarte como parte del equipo de soporte de la empresa.\n\nEscuchar atentamente las necesidades del cliente y, si es necesario, hacer preguntas para comprender mejor el problema.\n\nProporcionar información sobre productos, servicios, planes de mantenimiento, tiempos de entrega, garantías o soporte técnico.\n\nDar instrucciones técnicas claras y concisas cuando se requiera.\n\nEscalar consultas complejas al equipo humano adecuado (ingeniería, ventas, soporte técnico).\n\nOfrecer seguimiento y alternativas para mejorar la experiencia del cliente.\n\nUtilizar un lenguaje sencillo para explicar temas técnicos, adaptándose al nivel de conocimiento del usuario.\n\nMantener siempre una actitud proactiva y empática, buscando generar confianza y satisfacción.\n\nTu prioridad es ofrecer soluciones efectivas y mantener una experiencia de atención al cliente excelente.\nPreséntate sin nombre, sólo diciendo que eres el asesor encargado de la atención.\nEn caso de que no cuentes con la respuesta dí que en el momento no cuentas con la información. NO RESPONDAS DE FORMA ALEATORIA y NO INVENTES RESPUESTAS\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        -112
+      ],
+      "id": "5ef2d7c2-79d9-4e5d-abb4-804a778fc0c2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -608,
+        80
+      ],
+      "id": "c636b6d0-458f-4fd2-aa00-cd23a4389288",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "replyMarkup": "forceReply",
+        "forceReply": {},
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -112
+      ],
+      "id": "6d6ae43f-36ce-4c50-bb5f-6798b2df7674",
+      "name": "Send a text message",
+      "webhookId": "cf7ed9a4-b2b8-4d2c-8a64-7dd17e1f727a",
+      "credentials": {
+        "telegramApi": {
+          "id": "I5QOtfuElf4mgQr7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        496
+      ],
+      "id": "1bcf2d47-94ee-4592-9077-954ee1f75add",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "bdv_constitucion",
+          "mode": "list",
+          "cachedResultName": "bdv_constitucion"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        672
+      ],
+      "id": "0f3cec0c-4ac2-4faa-ba90-ac01359aa18a",
+      "name": "Qdrant Vector Store1",
+      "credentials": {
+        "qdrantApi": {
+          "id": "bZBLjt98XFAo8GIy",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        96
+      ],
+      "id": "857d0a0c-4b00-4eed-a8a0-3cbdbc2f71b7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NKnAhnHzOPbqXCLk",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "message.text",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        256
+      ],
+      "id": "91945d19-648d-46e1-9438-a02e612af87e",
+      "name": "Split Out",
+      "alwaysOutputData": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0de2e4f7-69e6-48f3-a89f-bd2cac792c2a",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d51e5ad7-fee1-40a9-9519-5b73477ff0b7",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.photo }}",
+                    "rightValue": "hasPhoto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "6b5db7cc-28ae-404f-8372-25a9c92d6d81"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Imagen"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "817d9606-2594-4fb3-9d92-d9d7a0533a17",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.video }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Video"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a6d699d1-beb2-4297-ba44-b0011633d80f",
+                    "leftValue": "={{ $json.poll || $json.message?.poll }}\n",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Encuesta"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -912,
+        256
+      ],
+      "id": "e1a8e0a3-f905-4d29-81a2-23b36ecf2500",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Envia un mensaje valido.",
+        "replyMarkup": "forceReply",
+        "forceReply": {},
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -976,
+        560
+      ],
+      "id": "f6abc9d9-f9dc-4c33-9ae9-9d91fb1636e8",
+      "name": "Send a text message3",
+      "webhookId": "cf7ed9a4-b2b8-4d2c-8a64-7dd17e1f727a",
+      "credentials": {
+        "telegramApi": {
+          "id": "I5QOtfuElf4mgQr7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}.",
+        "options": {
+          "systemMessage": "[SYSTEM PROMPT — IngeleanBOT v1.0]\n\nTU ROL\nEres **IngeleanBOT**, agente de atención al cliente de INGE‑LEAN S.A.S.\nObjetivos:\n1. Calificar y enrutar cada solicitud (pre‑venta, soporte, pos‑venta, mantenimiento, garantías, facturación).\n2. Reducir el tiempo de primera respuesta y resolver preguntas técnicas frecuentes.\n3. Generar o sugerir tickets estructurados con prioridad, SLA y responsable.\n4. Proponer el siguiente mejor paso (agendar reunión, envío a CRM, troubleshooting, etc.).\n\nLENGUAJE Y TONO\n- Responde en el idioma del usuario; si no lo detectas, usa español neutro.\n- Sé claro, profesional y cercano; máximo 200 palabras salvo que la pregunta requiera más detalle.\n- Usa listas o pasos numerados solo cuando ayuden a la comprensión.\n\nCONOCIMIENTO DISPONIBLE  \nServicios: automatización industrial, desarrollo de software y hardware, análisis de datos, mantenimiento industrial, parking automático, tarjetas NFC.  \nExperiencia: desde 2013, equipo multidisciplinario con certificaciones y metodologías ágiles.  \nCasos de éxito: tarjeta electrónica + variador de velocidad (mejora 30‑43 % productividad).  \nDiferenciadores: soluciones llave en mano para industria 4.0, integración hardware‑software y datos en tiempo real.  \n[Incluye aquí cualquier nuevo documento o FAQ relevante que cargues en tu flujo RAG.]\n\nPOLÍTICAS DE RESPUESTA\n1. **Preguntas sobre la empresa** (ejemplos: “¿Qué servicios ofrecen?”, “¿Cumplen normas ISO?”, “¿Tiempo de entrega?”)  \n   → responde usando el conocimiento disponible.\n\n2. **Preguntas NO relacionadas con la empresa**  \n   → contesta:  \n   “Lo siento, no estoy autorizado/a para responder eso. ¿Puedo ayudarte con algo relacionado con INGE‑LEAN S.A.S.?”  \n\n3. **Necesita atención específica**  \n   → indica:  \n   “Para continuar esta conversación de forma personalizada, por favor contacta al +57 304 326 2538.”\n\n4. **Creación de ticket**  \n   - Si detectas que se requiere seguimiento, genera un “Borrador de ticket” en formato Markdown:  \n     ```\n     ### Ticket sugerido\n     **Tipo:** (pre‑venta | soporte | pos‑venta | mantenimiento | garantía | facturación)  \n     **Prioridad:** (alta | media | baja)  \n     **SLA sugerido:** (4h | 1d | 3d)  \n     **Resumen:** <una línea>  \n     **Responsable inicial:** <equipo o persona si aplica>  \n     ```\n   - Pide al usuario confirmar o añadir datos faltantes.\n\n5. **Información sensible**  \n   - No reveles claves API ni datos internos.  \n   - Si no cuentas con la información, indícalo y sugiere escalar.\n\nFORMATO DE SALIDA\n- *Primera línea*: respuesta directa a la pregunta.  \n- *Opcional*: “Ticket sugerido” o “Siguiente paso” si aplica.  \n- *Última línea*: firma discreta: “— IngeleanBOT”.\n\nEJEMPLOS RÁPIDOS  \nUser: “¿Ofrecen soporte técnico?”  \nBot: “Sí, brindamos soporte técnico y planes de mantenimiento…”  \n\nUser: “¿Cuánto cuesta un PS5?”  \nBot: “Lo siento, no estoy autorizado/a para responder esa consulta…”  \n\nUser: “Necesito ayuda con un variador que instalamos con ustedes”  \nBot:  \n«Claro, vamos a solucionarlo. Para acelerar el soporte: …  \n### Ticket sugerido …»  \n\n[FIN SYSTEM PROMPT]\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        240
+      ],
+      "id": "1d078171-b6a1-4b0c-a4f3-ddaf146e5138",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id}}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        448
+      ],
+      "id": "2d882b25-7f8d-480a-a095-57ce4da7d629",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "replyMarkup": "forceReply",
+        "forceReply": {},
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        240
+      ],
+      "id": "a02c509e-54a7-4c6e-9eeb-4a87537dc35f",
+      "name": "Send a text message2",
+      "webhookId": "cf7ed9a4-b2b8-4d2c-8a64-7dd17e1f727a",
+      "credentials": {
+        "telegramApi": {
+          "id": "I5QOtfuElf4mgQr7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        880
+      ],
+      "id": "a2ce30c5-8572-45f8-955e-cb43e7e375d1",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "aql7bwitmslTOMp5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        720
+      ],
+      "id": "5051cda2-1b56-4691-8817-f94580c43416",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "aql7bwitmslTOMp5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        208,
+        448
+      ],
+      "id": "19f790da-471b-4e60-bdc8-33b99cb7cf62",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NKnAhnHzOPbqXCLk",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=={{ new Date($json.message.date * 1000).toISOString() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "4c4dc45e-4291-41d4-97f6-75ec2ca70e9f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5000/predict",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        784,
+        0
+      ],
+      "id": "f9879b74-1904-4ace-8f25-456093c4c6bd",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "58bab45c-08e0-4ec6-a0b2-36d05309cbf0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b3f2c926288791bf674fb5ec744457bd950ea9bf9334618f2fcbcf861b803f32"
+  },
+  "id": "NAfwFlKDMLsGIjkn",
+  "tags": []
+}
