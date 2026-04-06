@@ -1,0 +1,63 @@
+
+---
+
+### 🏛️ 1. Estructura de Datos (Keyspaces y Tablas)
+En Cassandra, un **Keyspace** es el equivalente a una Base de Datos.
+
+* `DESCRIBE KEYSPACES;`: Lista todos los keyspaces existentes.
+* `USE nombre_keyspace;`: Selecciona el keyspace para trabajar.
+* `DESCRIBE TABLES;`: Muestra las tablas del keyspace actual.
+* `DESCRIBE TABLE nombre_tabla;`: Te muestra el "blueprint" (esquema) exacto de la tabla, incluyendo sus llaves.
+* `CREATE KEYSPACE nombre WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};`: Crea un nuevo keyspace (fundamental para empezar).
+
+---
+
+### 📝 2. Operaciones CRUD en CQL
+A diferencia de Mongo, aquí los campos y tipos de datos son fijos.
+
+#### **Insertar**
+* `INSERT INTO tabla (col1, col2) VALUES (val1, val2);`: Inserta una fila. Recuerda que si la llave ya existe, Cassandra hace un **Upsert** (actualiza en lugar de error).
+
+#### **Consultar (El corazón de Cassandra)**
+* `SELECT * FROM tabla;`: Trae todo (úsalo solo en tablas pequeñas).
+* `SELECT * FROM tabla WHERE llave_particion = 'valor';`: La forma más eficiente de buscar.
+* `SELECT * FROM tabla WHERE columna = 'valor' ALLOW FILTERING;`: **¡Cuidado!** Úsalo solo si sabes que la tabla es pequeña o si no tienes otra opción, ya que escanea todo el clúster.
+
+#### **Actualizar y Borrar**
+* `UPDATE tabla SET columna = 'nuevo' WHERE llave = 'valor';`: Solo funciona si especificas la Primary Key completa.
+* `DELETE FROM tabla WHERE llave = 'valor';`: Borra la fila específica.
+
+---
+
+### ⚡ 3. Índices y Rendimiento
+Como aprendiste en el curso, los índices son vitales para poder filtrar por columnas que no son llaves.
+
+* `CREATE INDEX nombre_idx ON tabla (columna);`: Crea un índice secundario.
+* `DROP INDEX nombre_idx;`: Elimina el índice si ya no lo necesitas.
+* `TRUNCATE tabla;`: Borra todos los datos de la tabla pero mantiene la estructura.
+
+---
+
+### 🏗️ 4. La Llave Primaria (Primary Key)
+Este es el concepto más importante para **InsightFlow**. Se divide en dos:
+
+1.  **Partition Key:** Decide en qué nodo se guardan los datos.
+2.  **Clustering Columns:** Deciden cómo se ordenan los datos dentro del nodo.
+
+
+
+---
+
+### 🛠️ 5. Herramientas de Terminal (Fuera de `cqlsh`)
+Estos comandos los usaste para importar tu CSV y son los que automatizarás en **PowerUps SAS**:
+
+* **Importar CSV:**
+    `COPY tabla (col1, col2) FROM 'archivo.csv' WITH HEADER = TRUE;`
+* **Exportar a CSV:**
+    `COPY tabla (col1, col2) TO 'archivo.csv' WITH HEADER = TRUE;`
+
+---
+
+### 💡 Tip Pro:
+Si alguna vez sientes que una consulta en Cassandra es lenta o te da error, recuerda: **"Design for your queries"**. Si necesitas buscar por `email`, pero tu llave es `id_usuario`, lo mejor en Cassandra no es un índice, ¡sino crear otra tabla que tenga el `email` como llave!
+
