@@ -1,0 +1,72 @@
+---
+### 🗄️ 1. Administración de Bases de Datos y Colecciones
+Antes de meter datos, hay que saber dónde estamos parados.
+
+* `show dbs`: Muestra todas las bases de datos disponibles.
+* `use nombre_db`: Cambia a la base de datos especificada (o la crea si no existe al insertar el primer dato).
+* `db`: Te confirma en qué base de datos estás trabajando actualmente.
+* `show collections`: Lista todas las colecciones (tablas) de la DB actual.
+* `db.createCollection("nombre")`: Crea una colección explícitamente.
+
+---
+
+### 📝 2. Operaciones CRUD (Lo más usado)
+Aquí es donde ocurre la magia de insertar, buscar y editar.
+
+#### **Insertar**
+* `db.coleccion.insertOne({ campo: "valor" })`: Inserta un solo documento.
+* `db.coleccion.insertMany([{...}, {...}])`: Inserta varios documentos a la vez.
+
+#### **Buscar (Lectura)**
+* `db.coleccion.find()`: Trae todos los documentos.
+* `db.coleccion.find({ campo: "valor" })`: Filtra por un campo específico.
+* `db.coleccion.findOne()`: Trae solo el primer resultado que coincida.
+* `db.coleccion.find().pretty()`: Formatea la salida para que sea legible (en versiones viejas de Mongo).
+
+#### **Actualizar**
+* `db.coleccion.updateOne({ filtro }, { $set: { campo: "nuevo_valor" } })`: Cambia un campo en el primer documento que coincida.
+* `db.coleccion.updateMany(...)`: Cambia todos los documentos que cumplan el filtro.
+
+#### **Eliminar**
+* `db.coleccion.deleteOne({ _id: ... })`: Borra un documento.
+* `db.coleccion.deleteMany({})`: **¡Cuidado!** Borra todos los documentos de la colección.
+
+---
+
+### 📊 3. Operadores de Filtro y Agregación
+Para cuando necesitas consultas más inteligentes, como las que hiciste en el curso.
+
+| Operador | Significado | Ejemplo |
+| :--- | :--- | :--- |
+| `$gt` / `$gte` | Mayor que / Mayor o igual | `{ year: { $gt: 2000 } }` |
+| `$lt` / `$lte` | Menor que / Menor o igual | `{ rating: { $lt: 5 } }` |
+| `$in` | Está dentro de una lista | `{ tags: { $in: ["tech", "ai"] } }` |
+| `$exists` | Si el campo existe o no | `{ cargo: { $exists: true } }` |
+
+
+
+---
+
+### ⚙️ 4. El Framework de Agregación (`aggregate`)
+Este es el motor de reportes de MongoDB. Se basa en "etapas" (stages):
+
+* `$match`: Filtra los documentos (como un `WHERE` en SQL).
+* `$group`: Agrupa documentos por una clave (como el `_id: "$year"` que usaste).
+* `$sort`: Ordena los resultados (`1` para ascendente, `-1` para descendente).
+* `$project`: Selecciona qué campos quieres ver y cuáles ocultar.
+* `$limit`: Limita la cantidad de resultados.
+
+---
+
+### 🛠️ 5. Utilidades de Sistema (Terminal Linux)
+Como vimos en tus tareas, estos comandos se ejecutan **fuera** de la consola de Mongo:
+
+* `mongoimport --db db_name --collection coll_name --file datos.json`: Para cargar archivos masivos.
+* `mongoexport --db db_name --collection coll_name --out datos.csv --type=csv -f campos`: Para sacar los datos a Excel/CSV.
+
+---
+
+### 💡 Tip:
+Si alguna vez olvidas la sintaxis exacta de un comando mientras estás en la terminal, simplemente escribe:
+`db.coleccion.help()` o `db.coleccion.find().help()`
+
